@@ -1,0 +1,21 @@
+{
+  "name": "obsidian-smart-glossary",
+  "version": "1.0.0",
+  "description": "Highlights glossary terms in notes and shows definitions on hover",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^25.5.0",
+    "esbuild": "^0.27.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-obsidianmd": "^0.1.9",
+    "globals": "^17.4.0",
+    "obsidian": "^1.12.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
+  }
+}
