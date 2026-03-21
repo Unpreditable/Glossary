@@ -13,7 +13,7 @@ A bottom-up rebuild of an Obsidian plugin that highlights glossary terms in note
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Scaffold** - TypeScript + esbuild project compiles, plugin skeleton loads in Obsidian, hot-reload works (completed 2026-03-21)
-- [ ] **Phase 2: Settings Data Model** - All settings types and defaults defined, loadData/saveData persistence verified
+- [x] **Phase 2: Settings Data Model** - All settings types and defaults defined, loadData/saveData persistence verified (completed 2026-03-21)
 - [ ] **Phase 3: Glossary File Detection** - isGlossaryFile works, vault event listeners registered, index rebuilds on save
 - [ ] **Phase 4: Table Parsing + Term Index** - parseGlossaryFile handles 2-col and 3-col tables, plural handling, exclude lists
 - [ ] **Phase 5: Match Logic + Code Block Detection** - findTermsInText, fuzzy/edit-distance, overlap deduplication, code block exclusion via syntaxTree
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Build toolchain + plugin skeleton (package.json, esbuild config, tsconfig, ESLint, src/main.ts)
+- [x] 01-01-PLAN.md — Build toolchain + plugin skeleton (package.json, esbuild config, tsconfig, ESLint, src/main.ts)
 
 ### Phase 2: Settings Data Model
 **Goal**: All settings types, field names, and defaults exist in code and survive a plugin reload via Obsidian's loadData/saveData
@@ -47,7 +47,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — Settings types + defaults (src/settings.ts) and persistence wiring (src/main.ts)
+- [x] 02-01-PLAN.md — Settings types + defaults (src/settings.ts) and persistence wiring (src/main.ts)
 
 ### Phase 3: Glossary File Detection
 **Goal**: The plugin correctly identifies glossary files, waits for Obsidian's metadata cache to be ready before building the initial index, and rebuilds automatically when glossary files change
@@ -146,7 +146,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 1/1 | Complete   | 2026-03-21 |
-| 2. Settings Data Model | 0/1 | Not started | - |
+| 2. Settings Data Model | 1/1 | Complete   | 2026-03-21 |
 | 3. Glossary File Detection | 0/TBD | Not started | - |
 | 4. Table Parsing + Term Index | 0/TBD | Not started | - |
 | 5. Match Logic + Code Block Detection | 0/TBD | Not started | - |
