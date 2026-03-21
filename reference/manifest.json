@@ -1,0 +1,9 @@
+{
+	"id": "obsidian-glossary",
+	"name": "Smart Glossary",
+	"version": "1.0.0",
+	"minAppVersion": "1.9.12",
+	"description": "Automatically highlights and provides hover definitions for acronyms and terms defined in your glossary files. Supports fuzzy matching, case-sensitive acronyms, and smart table parsing from files tagged with #glossary.",
+	"author": "Vitaly Ditman",
+	"isDesktopOnly": false
+}
