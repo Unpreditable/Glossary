@@ -16,6 +16,30 @@ export default class GlossaryPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
     console.log("Smart Glossary loaded");
+
+    this.debouncedRebuild = debounce(
+      () => { void this.buildGlossaryIndex(); },
+      5000,
+      true  // resetTimer: reset window on each glossary file save
+    );
+
+    this.registerEvent(
+      this.app.vault.on("modify", (file: TAbstractFile) => {
+        if (file instanceof TFile && this.isGlossaryFile(file)) {
+          this.debouncedRebuild();
+        }
+      })
+    );
+
+    this.addCommand({
+      id: "refresh-glossary",
+      name: "Refresh glossary index",
+      callback: () => { void this.buildGlossaryIndex(); },
+    });
+
+    this.app.workspace.onLayoutReady(() => {
+      void this.buildGlossaryIndex();
+    });
   }
 
   onunload(): void {
