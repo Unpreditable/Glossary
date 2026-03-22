@@ -1,16 +1,12 @@
-import { Plugin, TFile, TAbstractFile, debounce, Debouncer } from "obsidian";
+import { Plugin, TFile, TAbstractFile, debounce, Debouncer, Notice } from "obsidian";
 import { GlossarySettings, DEFAULT_SETTINGS } from "./settings";
-
-export interface GlossaryTerm {
-  sourceFile: string;   // vault path of the glossary file
-  acronym?: string;
-  fullTerm?: string;
-  description?: string;
-}
+import { parseGlossaryFile } from "./index/tableParser";
+import { isGlossaryFile } from "./index/glossaryDetector";
+import type { TermIndex } from "./index/termIndex";
 
 export default class GlossaryPlugin extends Plugin {
   settings!: GlossarySettings;
-  private termIndex: Record<string, GlossaryTerm[]> = {};
+  private termIndex: TermIndex = {};
   private debouncedRebuild!: Debouncer<[], void>;
 
   async onload(): Promise<void> {
@@ -18,14 +14,14 @@ export default class GlossaryPlugin extends Plugin {
     console.log("Smart Glossary loaded");
 
     this.debouncedRebuild = debounce(
-      () => { void this.buildGlossaryIndex(); },
+      () => { void this.buildGlossaryIndex({ silent: true }); },
       5000,
       true  // resetTimer: reset window on each glossary file save
     );
 
     this.registerEvent(
       this.app.vault.on("modify", (file: TAbstractFile) => {
-        if (file instanceof TFile && this.isGlossaryFile(file)) {
+        if (file instanceof TFile && isGlossaryFile(this.app, file)) {
           this.debouncedRebuild();
         }
       })
@@ -38,7 +34,7 @@ export default class GlossaryPlugin extends Plugin {
     });
 
     this.app.workspace.onLayoutReady(() => {
-      void this.buildGlossaryIndex();
+      void this.buildGlossaryIndex({ silent: true });
     });
   }
 
@@ -54,28 +50,17 @@ export default class GlossaryPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  async buildGlossaryIndex(): Promise<void> {
+  async buildGlossaryIndex(options: { silent?: boolean } = {}): Promise<void> {
     this.termIndex = {};
+    let termCount = 0;
     const glossaryFiles = this.app.vault.getMarkdownFiles()
-      .filter((file) => this.isGlossaryFile(file));
+      .filter((file) => isGlossaryFile(this.app, file));
     for (const file of glossaryFiles) {
-      await this.parseGlossaryFile(file);
+      termCount += await parseGlossaryFile(this.app, file, this.settings, this.termIndex);
     }
-    console.log(`Glossary index built: ${glossaryFiles.length} glossary file(s) found`);
-  }
-
-  private async parseGlossaryFile(file: TFile): Promise<void> {
-    // stub: Phase 4 implements table parsing
-    void file;
-  }
-
-  private readonly GLOSSARY_TAG = "glossary" as const;
-
-  private isGlossaryFile(file: TFile): boolean {
-    const cache = this.app.metadataCache.getFileCache(file);
-    const tags = cache?.frontmatter?.tags as string | string[] | undefined;
-    return Array.isArray(tags)
-      ? tags.includes(this.GLOSSARY_TAG)
-      : tags === this.GLOSSARY_TAG;
+    console.log(`Glossary index built: ${termCount} terms from ${glossaryFiles.length} file(s)`);
+    if (!options.silent) {
+      new Notice(`Rebuilt ${termCount} terms from ${glossaryFiles.length} files`);
+    }
   }
 }
