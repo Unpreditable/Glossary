@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: complete
-stopped_at: "Phase 03 Plan 01 complete — all tasks done and human-verified"
-last_updated: "2026-03-21T00:00:00.000Z"
+status: verifying
+stopped_at: Completed 04-table-parsing-term-index-01-PLAN.md
+last_updated: "2026-03-22T03:46:05.480Z"
 last_activity: 2026-03-21 — Phase 3 Plan 01 complete (isGlossaryFile, debounced rebuild, onLayoutReady, refresh command verified in Obsidian)
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # Project State
@@ -51,6 +51,7 @@ Progress: [████████████░] (Phase 1 complete, Phase 2 i
 *Updated after each plan completion*
 | Phase 01-scaffold P01 | 30 | 3 tasks | 6 files |
 | Phase 02-settings-data-model P01 | 7 | 3 tasks | 2 files |
+| Phase 04-table-parsing-term-index P01 | 4 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Recent decisions affecting current work:
 - [Phase 03-01]: isGlossaryFile() handles both scalar (tags: glossary) and array (tags: [glossary, notes]) frontmatter formats
 - [Phase 03-01]: debouncedRebuild initialized in onload() not class field initializer — this.app available only after onload
 - [Phase 03-01]: void this.asyncMethod() pattern required for ESLint no-floating-promises compliance throughout Phase 3
+- [Phase 04-01]: no-useless-escape auto-fix: regex pipe inside character class needs no escaping; fixed [\s\-\|] to [\s\-|] for ESLint 0-error gate
+- [Phase 04-01]: parseGlossaryFile() returns row count not index key count; plural +s entries do not increment count
 
 ### Pending Todos
 
@@ -87,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T00:00:00.000Z
-Stopped at: Completed 03-01-PLAN.md — Phase 3 Glossary File Detection fully done
+Last session: 2026-03-22T03:46:05.476Z
+Stopped at: Completed 04-table-parsing-term-index-01-PLAN.md
 Resume file: None
