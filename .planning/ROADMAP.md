@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Scaffold** - TypeScript + esbuild project compiles, plugin skeleton loads in Obsidian, hot-reload works (completed 2026-03-21)
 - [x] **Phase 2: Settings Data Model** - All settings types and defaults defined, loadData/saveData persistence verified (completed 2026-03-21)
-- [ ] **Phase 3: Glossary File Detection** - isGlossaryFile works, vault event listeners registered, index rebuilds on save
+- [x] **Phase 3: Glossary File Detection** - isGlossaryFile works, vault event listeners registered, index rebuilds on save (completed 2026-03-22)
 - [ ] **Phase 4: Table Parsing + Term Index** - parseGlossaryFile handles 2-col and 3-col tables, plural handling, exclude lists
 - [ ] **Phase 5: Match Logic + Code Block Detection** - findTermsInText, fuzzy/edit-distance, overlap deduplication, code block exclusion via syntaxTree
 - [ ] **Phase 6: Decorations + Highlight Styles** - GlossaryViewPlugin CM6 ViewPlugin, RangeSetBuilder, gradient + solid highlight CSS injection
@@ -61,7 +61,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 03-01-PLAN.md — GlossaryTerm interface, termIndex, isGlossaryFile(), debounced modify listener, onLayoutReady initial build, refresh command (src/main.ts)
+- [x] 03-01-PLAN.md — GlossaryTerm interface, termIndex, isGlossaryFile(), debounced modify listener, onLayoutReady initial build, refresh command (src/main.ts)
 
 ### Phase 4: Table Parsing + Term Index
 **Goal**: Glossary markdown tables are fully parsed into a usable term index, including 2-col and 3-col formats, automatic plural variants, and per-entry exclusion filtering
@@ -147,7 +147,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 1/1 | Complete   | 2026-03-21 |
 | 2. Settings Data Model | 1/1 | Complete   | 2026-03-21 |
-| 3. Glossary File Detection | 0/1 | Not started | - |
+| 3. Glossary File Detection | 1/1 | Complete   | 2026-03-22 |
 | 4. Table Parsing + Term Index | 0/TBD | Not started | - |
 | 5. Match Logic + Code Block Detection | 0/TBD | Not started | - |
 | 6. Decorations + Highlight Styles | 0/TBD | Not started | - |
