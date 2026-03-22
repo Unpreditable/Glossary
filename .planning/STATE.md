@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 04-table-parsing-term-index-01-PLAN.md
-last_updated: "2026-03-22T03:46:05.480Z"
+stopped_at: "Checkpoint 04-02 Task 2: awaiting human verification in Obsidian"
+last_updated: "2026-03-22T03:50:26.713Z"
 last_activity: 2026-03-21 — Phase 3 Plan 01 complete (isGlossaryFile, debounced rebuild, onLayoutReady, refresh command verified in Obsidian)
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -79,6 +79,8 @@ Recent decisions affecting current work:
 - [Phase 03-01]: void this.asyncMethod() pattern required for ESLint no-floating-promises compliance throughout Phase 3
 - [Phase 04-01]: no-useless-escape auto-fix: regex pipe inside character class needs no escaping; fixed [\s\-\|] to [\s\-|] for ESLint 0-error gate
 - [Phase 04-01]: parseGlossaryFile() returns row count not index key count; plural +s entries do not increment count
+- [Phase 04-02]: Removed GlossaryTerm from main.ts imports — only TermIndex alias needed; GlossaryTerm already encapsulated within TermIndex type
+- [Phase 04-02]: Used import type { TermIndex } to satisfy ESLint no-unused-vars with 0 warnings
 
 ### Pending Todos
 
@@ -90,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T03:46:05.476Z
-Stopped at: Completed 04-table-parsing-term-index-01-PLAN.md
+Last session: 2026-03-22T03:50:22.334Z
+Stopped at: Checkpoint 04-02 Task 2: awaiting human verification in Obsidian
 Resume file: None
