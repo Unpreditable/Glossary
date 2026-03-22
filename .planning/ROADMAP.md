@@ -58,10 +58,10 @@ Plans:
   2. On vault load, the index is not empty — the initial build fires after onLayoutReady, not before
   3. Saving a glossary file triggers an automatic index rebuild within ~300ms (debounced)
   4. Running "Refresh glossary index" from the command palette triggers a manual rebuild and shows a notice
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- (none yet — populated by plan-phase)
+- [ ] 03-01-PLAN.md — GlossaryTerm interface, termIndex, isGlossaryFile(), debounced modify listener, onLayoutReady initial build, refresh command (src/main.ts)
 
 ### Phase 4: Table Parsing + Term Index
 **Goal**: Glossary markdown tables are fully parsed into a usable term index, including 2-col and 3-col formats, automatic plural variants, and per-entry exclusion filtering
@@ -147,7 +147,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 1/1 | Complete   | 2026-03-21 |
 | 2. Settings Data Model | 1/1 | Complete   | 2026-03-21 |
-| 3. Glossary File Detection | 0/TBD | Not started | - |
+| 3. Glossary File Detection | 0/1 | Not started | - |
 | 4. Table Parsing + Term Index | 0/TBD | Not started | - |
 | 5. Match Logic + Code Block Detection | 0/TBD | Not started | - |
 | 6. Decorations + Highlight Styles | 0/TBD | Not started | - |
