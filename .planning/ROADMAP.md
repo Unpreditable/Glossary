@@ -73,10 +73,11 @@ Plans:
   3. An acronym "API" in any glossary table also matches "APIs" (plural auto-indexed as a separate entry)
   4. An acronym listed in excludeAcronyms is not present in the built index
   5. A term listed in excludeTerms is not present in the built index
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- (none yet — populated by plan-phase)
+- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
+- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
 
 ### Phase 5: Match Logic + Code Block Detection
 **Goal**: The matching engine correctly finds terms in editor text — respecting matchBy, case sensitivity, fuzzy threshold, overlap rules, and code block boundaries — and emits sorted, deduplicated match ranges
@@ -91,10 +92,11 @@ Plans:
   6. Fuzzy matching (when enabled) finds full terms within the configured edit-distance threshold; exact matching (when disabled) does not produce fuzzy hits
 
 **Note for plan-phase — PERFORMANCE DISCUSSION REQUIRED**: Before implementing fuzzy matching in this phase, discuss the incremental scanning approach with the user. The reference implementation re-scans the full visible viewport on every CM6 update. A better approach uses `update.changes` to detect which document ranges actually changed and only re-evaluates matches for those lines. This avoids O(N*M) fuzzy cost per keystroke. The plan-phase step must surface this choice explicitly before writing any fuzzy matching code — the user flagged it as a decision point, not an implementation detail.
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- (none yet — populated by plan-phase)
+- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
+- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
 
 ### Phase 6: Decorations + Highlight Styles
 **Goal**: Matched terms are visibly decorated in the CodeMirror editor using the correct highlight style, with CSS injected correctly and styles updating when settings change
@@ -105,10 +107,11 @@ Plans:
   2. All 10 gradient styles (gradient1–gradient10) are selectable and each produces a distinct visible appearance
   3. The solid style uses the custom color from the color picker and updates within one keystroke of changing the color
   4. Decorations cover only the visible viewport ranges, not the full document
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- (none yet — populated by plan-phase)
+- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
+- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
 
 ### Phase 7: Hover Tooltip
 **Goal**: Hovering a highlighted term shows a well-formed tooltip with the term's full data and handles multi-definition terms correctly
@@ -119,10 +122,11 @@ Plans:
   2. The tooltip displays the source glossary file's name
   3. When multiple glossary entries define the same term, the tooltip shows the first entry plus a "+N more" indicator for the remaining count
   4. Hovering unhighlighted text shows no tooltip
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- (none yet — populated by plan-phase)
+- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
+- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
 
 ### Phase 8: Settings Tab UI
 **Goal**: The settings tab exposes all plugin configuration with correct labels, conditional visibility, a live highlight preview, and a back button that returns to the main settings list
@@ -133,10 +137,11 @@ Plans:
   2. The excludeAcronyms control is only shown when matchBy includes acronyms; the excludeTerms control is only shown when matchBy includes terms
   3. Changing the highlight style in settings immediately updates the live preview swatch without requiring a plugin reload
   4. The settings tab includes a back button that returns focus to Obsidian's main settings list
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- (none yet — populated by plan-phase)
+- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
+- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
 
 ## Progress
 
