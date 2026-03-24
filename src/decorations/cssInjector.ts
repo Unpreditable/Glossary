@@ -1,0 +1,50 @@
+import type { GlossarySettings } from '../settings';
+
+const STYLE_ID = 'glossary-plugin-styles';
+
+const GRADIENTS: Record<string, string> = {
+  gradient1:  'linear-gradient(90deg, #0065ff, #bf63f3, #f5e6a8)',
+  gradient2:  'linear-gradient(90deg, #ff6b6b, #feca57, #48cae4)',
+  gradient3:  'linear-gradient(90deg, #667eea, #764ba2, #f093fb)',
+  gradient4:  'linear-gradient(90deg, #ffecd2, #fcb69f, #ff8a80)',
+  gradient5:  'linear-gradient(90deg, #a8edea, #fed6e3, #ffeaa7)',
+  gradient6:  'linear-gradient(90deg, #ff9a9e, #fecfef, #fecfef)',
+  gradient7:  'linear-gradient(90deg, #21d4fd, #b721ff, #fcb045)',
+  gradient8:  'linear-gradient(90deg, #96fbc4, #f9f586, #ff8a80)',
+  gradient9:  'linear-gradient(90deg, #fbc2eb, #a6c1ee, #c2e9fb)',
+  gradient10: 'linear-gradient(90deg, #84fab0, #8fd3f4, #d299c2)',
+};
+
+/**
+ * Returns the CSS rule block for the .cm-glossary-highlight class
+ * based on the current settings. Pure function — no DOM access.
+ */
+export function buildStylesheet(settings: GlossarySettings): string {
+  if (settings.highlightStyle === 'solid') {
+    return `.cm-glossary-highlight { text-decoration: underline; text-decoration-color: ${settings.highlightColor}; text-decoration-thickness: 2px; background-color: ${settings.highlightColor}15; }`;
+  }
+
+  const grad = GRADIENTS[settings.highlightStyle];
+  return `.cm-glossary-highlight { background: ${grad}; background-clip: text; -webkit-background-clip: text; color: transparent; border-bottom: 2px solid transparent; border-image: ${grad} 0 0 100% 0; }`;
+}
+
+/**
+ * Writes a <style id="glossary-plugin-styles"> element to document.head.
+ * Removes any previously injected element first to prevent duplicates.
+ */
+export function injectGlossaryStyles(settings: GlossarySettings): void {
+  document.getElementById(STYLE_ID)?.remove();
+  // eslint-disable-next-line obsidianmd/no-forbidden-elements -- dynamic CSS injection required for settings-based gradient/solid styles; cannot use static styles.css
+  const styleEl = document.createElement('style');
+  styleEl.id = STYLE_ID;
+  styleEl.textContent = buildStylesheet(settings);
+  document.head.appendChild(styleEl);
+}
+
+/**
+ * Removes the glossary highlight stylesheet from document.head.
+ * No-op if the element does not exist.
+ */
+export function removeGlossaryStyles(): void {
+  document.getElementById(STYLE_ID)?.remove();
+}
