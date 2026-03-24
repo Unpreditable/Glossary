@@ -76,8 +76,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
-- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
+- [x] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
+- [x] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
 
 ### Phase 5: Match Logic + Code Block Detection
 **Goal**: The matching engine correctly finds terms in editor text — respecting matchBy, case sensitivity, fuzzy threshold, overlap rules, and code block boundaries — and emits sorted, deduplicated match ranges
@@ -85,18 +85,16 @@ Plans:
 **Requirements**: MATC-01, MATC-02, MATC-03, MATC-04, HIGH-02, HIGH-03, FOLD-01, FOLD-02
 **Success Criteria** (what must be TRUE):
   1. With matchBy=acronym only acronyms are matched; with matchBy=term only full terms; with matchBy=both, both are matched
-  2. Terms inside inline code spans (`` `code` ``) and fenced code blocks are never included in match results
+  2. Terms inside inline code spans and fenced code blocks are never included in match results
   3. Glossary files themselves produce no matches (the file being edited is checked against isGlossaryFile)
   4. When an acronym and a full-term match overlap at the same position, only one decoration is emitted (acronym wins)
   5. Notes inside includeFolders paths receive highlighting; notes inside excludeFolders paths do not
   6. Fuzzy matching (when enabled) finds full terms within the configured edit-distance threshold; exact matching (when disabled) does not produce fuzzy hits
-
-**Note for plan-phase — PERFORMANCE DISCUSSION REQUIRED**: Before implementing fuzzy matching in this phase, discuss the incremental scanning approach with the user. The reference implementation re-scans the full visible viewport on every CM6 update. A better approach uses `update.changes` to detect which document ranges actually changed and only re-evaluates matches for those lines. This avoids O(N*M) fuzzy cost per keystroke. The plan-phase step must surface this choice explicitly before writing any fuzzy matching code — the user flagged it as a decision point, not an implementation detail.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
-- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
+- [ ] 05-01-PLAN.md — Jest test infrastructure + TermMatcher class (src/matcher/termMatcher.ts) via TDD
+- [ ] 05-02-PLAN.md — codeBlockDetector.ts (CM6 syntax tree) + main.ts matcher wiring + Obsidian verification
 
 ### Phase 6: Decorations + Highlight Styles
 **Goal**: Matched terms are visibly decorated in the CodeMirror editor using the correct highlight style, with CSS injected correctly and styles updating when settings change
@@ -110,8 +108,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
-- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
+- [ ] 06-01-PLAN.md — TBD
+- [ ] 06-02-PLAN.md — TBD
 
 ### Phase 7: Hover Tooltip
 **Goal**: Hovering a highlighted term shows a well-formed tooltip with the term's full data and handles multi-definition terms correctly
@@ -125,8 +123,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
-- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
+- [ ] 07-01-PLAN.md — TBD
+- [ ] 07-02-PLAN.md — TBD
 
 ### Phase 8: Settings Tab UI
 **Goal**: The settings tab exposes all plugin configuration with correct labels, conditional visibility, a live highlight preview, and a back button that returns to the main settings list
@@ -140,8 +138,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create src/index/ module files (termIndex.ts, glossaryDetector.ts, tableParser.ts)
-- [ ] 04-02-PLAN.md — Wire main.ts to use src/index/ modules, verify parsing behaviors in Obsidian
+- [ ] 08-01-PLAN.md — TBD
+- [ ] 08-02-PLAN.md — TBD
 
 ## Progress
 
@@ -154,7 +152,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 2. Settings Data Model | 1/1 | Complete   | 2026-03-21 |
 | 3. Glossary File Detection | 1/1 | Complete   | 2026-03-22 |
 | 4. Table Parsing + Term Index | 2/2 | Complete   | 2026-03-24 |
-| 5. Match Logic + Code Block Detection | 0/TBD | Not started | - |
+| 5. Match Logic + Code Block Detection | 0/2 | Not started | - |
 | 6. Decorations + Highlight Styles | 0/TBD | Not started | - |
 | 7. Hover Tooltip | 0/TBD | Not started | - |
 | 8. Settings Tab UI | 0/TBD | Not started | - |
