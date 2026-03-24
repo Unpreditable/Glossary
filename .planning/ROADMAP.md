@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Settings Data Model** - All settings types and defaults defined, loadData/saveData persistence verified (completed 2026-03-21)
 - [x] **Phase 3: Glossary File Detection** - isGlossaryFile works, vault event listeners registered, index rebuilds on save (completed 2026-03-22)
 - [x] **Phase 4: Table Parsing + Term Index** - parseGlossaryFile handles 2-col and 3-col tables, plural handling, exclude lists (completed 2026-03-22)
-- [ ] **Phase 5: Match Logic + Code Block Detection** - findTermsInText, fuzzy/edit-distance, overlap deduplication, code block exclusion via syntaxTree
+- [x] **Phase 5: Match Logic + Code Block Detection** - findTermsInText, fuzzy/edit-distance, overlap deduplication, code block exclusion via syntaxTree (completed 2026-03-24)
 - [ ] **Phase 6: Decorations + Highlight Styles** - GlossaryViewPlugin CM6 ViewPlugin, RangeSetBuilder, gradient + solid highlight CSS injection
 - [ ] **Phase 7: Hover Tooltip** - createTooltipExtension, tooltip DOM, data-terms reading, +N more, source file display
 - [ ] **Phase 8: Settings Tab UI** - GlossarySettingTab, all controls, conditional rendering, live preview, back button, refresh command
@@ -152,7 +152,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 2. Settings Data Model | 1/1 | Complete   | 2026-03-21 |
 | 3. Glossary File Detection | 1/1 | Complete   | 2026-03-22 |
 | 4. Table Parsing + Term Index | 2/2 | Complete   | 2026-03-24 |
-| 5. Match Logic + Code Block Detection | 1/2 | In Progress|  |
+| 5. Match Logic + Code Block Detection | 2/2 | Complete   | 2026-03-24 |
 | 6. Decorations + Highlight Styles | 0/TBD | Not started | - |
 | 7. Hover Tooltip | 0/TBD | Not started | - |
 | 8. Settings Tab UI | 0/TBD | Not started | - |
