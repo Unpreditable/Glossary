@@ -36,8 +36,8 @@ This is a fidelity rebuild. All requirements are in scope — no v2 deferral.
 - [ ] **HIGH-01**: Matched terms decorated with highlight mark in CodeMirror editor (visible ranges only, not full document)
 - [x] **HIGH-02**: Terms inside inline code spans and fenced code blocks are not highlighted
 - [x] **HIGH-03**: Glossary files themselves are not highlighted (terms defined there are not decorated)
-- [ ] **HIGH-04**: 10 named gradient highlight styles available (gradient1–gradient10)
-- [ ] **HIGH-05**: Solid highlight style available with custom color picker
+- [x] **HIGH-04**: 10 named gradient highlight styles available (gradient1–gradient10)
+- [x] **HIGH-05**: Solid highlight style available with custom color picker
 
 ### Tooltip
 
@@ -97,8 +97,8 @@ This is a fidelity rebuild. All requirements are in scope — no v2 deferral.
 | FOLD-01 | Phase 5 | Complete |
 | FOLD-02 | Phase 5 | Complete |
 | HIGH-01 | Phase 6 | Pending |
-| HIGH-04 | Phase 6 | Pending |
-| HIGH-05 | Phase 6 | Pending |
+| HIGH-04 | Phase 6 | Complete |
+| HIGH-05 | Phase 6 | Complete |
 | TOOL-01 | Phase 7 | Pending |
 | TOOL-02 | Phase 7 | Pending |
 | TOOL-03 | Phase 7 | Pending |

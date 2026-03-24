@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-24T02:40:44.971Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-24T04:07:19.061Z"
 last_activity: 2026-03-23 — Phase 4 Plan 02 complete (main.ts wired to src/index/ modules, parsing behaviors verified in Obsidian)
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 9
+  completed_plans: 8
   percent: 100
 ---
 
@@ -56,6 +56,7 @@ Progress: [██████████] 100%
 | Phase 04-table-parsing-term-index P02 | 9 | 2 tasks | 1 files |
 | Phase 05-match-logic-code-block-detection P01 | 317 | 2 tasks | 6 files |
 | Phase 05-match-logic-code-block-detection P02 | continuation | 3 tasks | 2 files |
+| Phase 06-decorations-highlight-styles P01 | 8 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 05-01]: normalizeFolder uses lowercase + trailing slash to prevent false prefix matches (notes vs notes-archive)
 - [Phase 05-02]: isInCodeBlock walks the Lezer SyntaxNode parent chain — idiomatic CM6 approach, handles nested markup correctly
 - [Phase 05-02]: matcher! uses definite assignment (not optional) consistent with settings! — ViewPlugin always accesses after onload
+- [Phase 06-01]: Extracted buildStylesheet() as pure function — testable in Node env without DOM mocking
+- [Phase 06-01]: eslint-disable-next-line for obsidianmd/no-forbidden-elements on createElement('style') — dynamic CSS injection required for settings-based gradient/solid styles
+- [Phase 06-01]: Wave 0 glossaryViewPlugin.test.ts stub created to satisfy Nyquist rule before Plan 02 implementation
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T02:40:44.952Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-24T04:07:19.035Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
