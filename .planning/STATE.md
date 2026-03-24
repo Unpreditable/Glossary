@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Checkpoint 06-02 Task 3 — awaiting Obsidian visual verification
-last_updated: "2026-03-24T04:19:12.573Z"
+stopped_at: Completed 06-02-PLAN.md — all 3 tasks done, 3 bugs fixed, SUMMARY updated
+last_updated: "2026-03-24T04:53:23.402Z"
 last_activity: 2026-03-23 — Phase 4 Plan 02 complete (main.ts wired to src/index/ modules, parsing behaviors verified in Obsidian)
 progress:
   total_phases: 8
@@ -58,6 +58,7 @@ Progress: [██████████] 100%
 | Phase 05-match-logic-code-block-detection P02 | continuation | 3 tasks | 2 files |
 | Phase 06-decorations-highlight-styles P01 | 8 | 2 tasks | 3 files |
 | Phase 06-decorations-highlight-styles P02 | 15 | 2 tasks | 3 files |
+| Phase 06-decorations-highlight-styles P02 | 40 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 06-02]: Used PluginRef structural interface in glossaryViewPlugin.ts to avoid circular dependency with main.ts
 - [Phase 06-02]: data-terms attribute stores JSON.stringify(match.terms) — Phase 7 hover popup contract
 - [Phase 06-02]: LOOKAHEAD_BYTES=4000 for 50-line buffer; cursor-only update guard returns early without re-scan
+- [Phase 06-02]: Text-based fenced block detection (computeFencedLineOffsets) is primary exclusion — Lezer node names vary across Obsidian versions
+- [Phase 06-02]: Solid highlight style is underline-only — background-color removed after Obsidian verification revealed unwanted word tinting
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T04:19:12.558Z
-Stopped at: Checkpoint 06-02 Task 3 — awaiting Obsidian visual verification
+Last session: 2026-03-24T04:53:23.396Z
+Stopped at: Completed 06-02-PLAN.md — all 3 tasks done, 3 bugs fixed, SUMMARY updated
 Resume file: None
