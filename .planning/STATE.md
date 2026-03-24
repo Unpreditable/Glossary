@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-24T04:07:19.061Z"
+stopped_at: Checkpoint 06-02 Task 3 — awaiting Obsidian visual verification
+last_updated: "2026-03-24T04:19:12.573Z"
 last_activity: 2026-03-23 — Phase 4 Plan 02 complete (main.ts wired to src/index/ modules, parsing behaviors verified in Obsidian)
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 100
 ---
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100%
 | Phase 05-match-logic-code-block-detection P01 | 317 | 2 tasks | 6 files |
 | Phase 05-match-logic-code-block-detection P02 | continuation | 3 tasks | 2 files |
 | Phase 06-decorations-highlight-styles P01 | 8 | 2 tasks | 3 files |
+| Phase 06-decorations-highlight-styles P02 | 15 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase 06-01]: Extracted buildStylesheet() as pure function — testable in Node env without DOM mocking
 - [Phase 06-01]: eslint-disable-next-line for obsidianmd/no-forbidden-elements on createElement('style') — dynamic CSS injection required for settings-based gradient/solid styles
 - [Phase 06-01]: Wave 0 glossaryViewPlugin.test.ts stub created to satisfy Nyquist rule before Plan 02 implementation
+- [Phase 06-02]: Used PluginRef structural interface in glossaryViewPlugin.ts to avoid circular dependency with main.ts
+- [Phase 06-02]: data-terms attribute stores JSON.stringify(match.terms) — Phase 7 hover popup contract
+- [Phase 06-02]: LOOKAHEAD_BYTES=4000 for 50-line buffer; cursor-only update guard returns early without re-scan
 
 ### Pending Todos
 
@@ -105,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T04:07:19.035Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-24T04:19:12.558Z
+Stopped at: Checkpoint 06-02 Task 3 — awaiting Obsidian visual verification
 Resume file: None
