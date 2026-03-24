@@ -108,8 +108,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — TBD
-- [ ] 06-02-PLAN.md — TBD
+- [ ] 06-01-PLAN.md — cssInjector.ts TDD (buildStylesheet pure function, 10 gradient values, solid style)
+- [ ] 06-02-PLAN.md — GlossaryViewPlugin (incremental cache) + main.ts wiring + Obsidian verification
 
 ### Phase 7: Hover Tooltip
 **Goal**: Hovering a highlighted term shows a well-formed tooltip with the term's full data and handles multi-definition terms correctly
