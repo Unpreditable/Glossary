@@ -97,9 +97,9 @@ describe('buildStylesheet — solid style', () => {
     expect(css).toContain('text-decoration-color: #ff6b35');
   });
 
-  it('solid contains background-color with 15 hex opacity suffix', () => {
+  it('solid does NOT contain background-color (underline-only, no tint)', () => {
     const css = buildStylesheet({ ...defaults, highlightStyle: 'solid', highlightColor: '#ff6b35' });
-    expect(css).toContain('background-color: #ff6b3515');
+    expect(css).not.toContain('background-color');
   });
 
   it('solid contains text-decoration-thickness: 2px', () => {

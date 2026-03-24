@@ -21,7 +21,7 @@ const GRADIENTS: Record<string, string> = {
  */
 export function buildStylesheet(settings: GlossarySettings): string {
   if (settings.highlightStyle === 'solid') {
-    return `.cm-glossary-highlight { text-decoration: underline; text-decoration-color: ${settings.highlightColor}; text-decoration-thickness: 2px; background-color: ${settings.highlightColor}15; }`;
+    return `.cm-glossary-highlight { text-decoration: underline; text-decoration-color: ${settings.highlightColor}; text-decoration-thickness: 2px; }`;
   }
 
   const grad = GRADIENTS[settings.highlightStyle];
