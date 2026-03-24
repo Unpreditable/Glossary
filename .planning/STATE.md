@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: "Checkpoint 04-02 Task 2: awaiting human verification in Obsidian"
-last_updated: "2026-03-22T03:50:26.713Z"
+status: in_progress
+stopped_at: Completed 04-02-PLAN.md — Phase 4 Table Parsing + Term Index fully verified
+last_updated: "2026-03-24T00:42:27.429Z"
 last_activity: 2026-03-21 — Phase 3 Plan 01 complete (isGlossaryFile, debounced rebuild, onLayoutReady, refresh command verified in Obsidian)
 progress:
   total_phases: 8
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Terms defined in glossary files must be highlighted in notes and show their definition on hover — reliably, without breaking the editing experience.
-**Current focus:** Phase 4 — Table Parsing + Term Index
+**Current focus:** Phase 5 — Match Logic + Code Block Detection (fuzzy scan strategy decision required first)
 
 ## Current Position
 
-Phase: 3 of 8 (Glossary File Detection) — COMPLETE
-Plan: 1 of 1 plans (Phase 3 Plan 01 — all tasks complete)
-Status: Phase 3 Plan 01 all 3 tasks complete; user verified all four detection behaviors (INDX-01, INDX-05, INDX-06, INDX-07) in Obsidian developer console
-Last activity: 2026-03-21 — Phase 3 Plan 01 complete (isGlossaryFile, debounced rebuild, onLayoutReady, refresh command verified in Obsidian)
+Phase: 4 of 8 (Table Parsing + Term Index) — COMPLETE
+Plan: 2 of 2 plans (Phase 4 Plan 02 — all tasks complete, Obsidian verification passed)
+Status: Phase 4 fully complete; all 5 requirements (INDX-02, INDX-03, INDX-04, MATC-05, MATC-06) verified in Obsidian
+Last activity: 2026-03-23 — Phase 4 Plan 02 complete (main.ts wired to src/index/ modules, parsing behaviors verified in Obsidian)
 
-Progress: [████████████░] (Phase 1 complete, Phase 2 in progress)
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [████████████░] (Phase 1 complete, Phase 2 i
 | Phase 01-scaffold P01 | 30 | 3 tasks | 6 files |
 | Phase 02-settings-data-model P01 | 7 | 3 tasks | 2 files |
 | Phase 04-table-parsing-term-index P01 | 4 | 2 tasks | 3 files |
+| Phase 04-table-parsing-term-index P02 | 9 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T03:50:22.334Z
-Stopped at: Checkpoint 04-02 Task 2: awaiting human verification in Obsidian
+Last session: 2026-03-24T00:42:27.424Z
+Stopped at: Completed 04-02-PLAN.md — Phase 4 Table Parsing + Term Index fully verified
 Resume file: None

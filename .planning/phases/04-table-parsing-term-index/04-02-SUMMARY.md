@@ -57,7 +57,7 @@ completed: 2026-03-21
 - **Duration:** 8 min
 - **Started:** 2026-03-21T03:47:19Z
 - **Completed:** 2026-03-21T03:55:00Z
-- **Tasks:** 1 of 2 complete (Task 2 is checkpoint:human-verify)
+- **Tasks:** 2 of 2 complete
 - **Files modified:** 1
 
 ## Accomplishments
@@ -70,7 +70,7 @@ completed: 2026-03-21
 ## Task Commits
 
 1. **Task 1: Update main.ts — imports, GlossaryTerm removal, buildGlossaryIndex wiring** - `b96e845` (feat)
-2. **Task 2: Verify Phase 4 parsing behaviors in Obsidian** - awaiting human verification
+2. **Task 2: Verify Phase 4 parsing behaviors in Obsidian** - approved by user (all 6 behaviors confirmed in Obsidian)
 
 ## Files Created/Modified
 - `src/main.ts` - Wired to src/index/ modules; buildGlossaryIndex() uses silent option and Notice
@@ -90,8 +90,13 @@ None - build and lint passed cleanly after removing unused GlossaryTerm import.
 None - no external service configuration required.
 
 ## Next Phase Readiness
-- Task 2 (human verification in Obsidian) must be completed before this plan is marked done
-- After verification, Phase 5 (highlighting) can begin — requires fuzzy matching scan strategy decision first (see STATE.md blocker)
+- All Phase 4 behaviors verified in Obsidian (INDX-02, INDX-03, INDX-04, MATC-05, MATC-06 all confirmed)
+- Phase 5 (Match Logic + Code Block Detection) is next — requires fuzzy matching scan strategy discussion with user before implementation begins (see STATE.md blocker)
+
+## Self-Check: PASSED
+- SUMMARY.md created and complete
+- Task 1 commit b96e845 verified in git log
+- All 6 Obsidian verification behaviors approved by user
 
 ---
 *Phase: 04-table-parsing-term-index*
