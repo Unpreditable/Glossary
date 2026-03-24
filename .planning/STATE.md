@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-stopped_at: Completed 04-02-PLAN.md — Phase 4 Table Parsing + Term Index fully verified
-last_updated: "2026-03-24T00:42:27.429Z"
-last_activity: 2026-03-21 — Phase 3 Plan 01 complete (isGlossaryFile, debounced rebuild, onLayoutReady, refresh command verified in Obsidian)
+status: verifying
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-24T01:53:07.492Z"
+last_activity: 2026-03-23 — Phase 4 Plan 02 complete (main.ts wired to src/index/ modules, parsing behaviors verified in Obsidian)
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 7
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -53,6 +54,7 @@ Progress: [██████████] 100%
 | Phase 02-settings-data-model P01 | 7 | 3 tasks | 2 files |
 | Phase 04-table-parsing-term-index P01 | 4 | 2 tasks | 3 files |
 | Phase 04-table-parsing-term-index P02 | 9 | 2 tasks | 1 files |
+| Phase 05-match-logic-code-block-detection P01 | 317 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -82,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase 04-01]: parseGlossaryFile() returns row count not index key count; plural +s entries do not increment count
 - [Phase 04-02]: Removed GlossaryTerm from main.ts imports — only TermIndex alias needed; GlossaryTerm already encapsulated within TermIndex type
 - [Phase 04-02]: Used import type { TermIndex } to satisfy ESLint no-unused-vars with 0 warnings
+- [Phase 05-01]: Unnecessary type assertions on Object.entries removed — TermIndex inference is sufficient
+- [Phase 05-01]: Fuzzy matching applies to full-term words only, not acronyms — acronym precision must not be degraded
+- [Phase 05-01]: normalizeFolder uses lowercase + trailing slash to prevent false prefix matches (notes vs notes-archive)
 
 ### Pending Todos
 
@@ -93,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T00:42:27.424Z
-Stopped at: Completed 04-02-PLAN.md — Phase 4 Table Parsing + Term Index fully verified
+Last session: 2026-03-24T01:53:07.487Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None

@@ -24,10 +24,10 @@ This is a fidelity rebuild. All requirements are in scope — no v2 deferral.
 
 ### Matching
 
-- [ ] **MATC-01**: Terms matched by acronym only, full term only, or both (configurable via matchBy setting)
-- [ ] **MATC-02**: Case sensitivity configurable — acronyms always case-sensitive in 2-col tables; configurable for 3-col table terms
-- [ ] **MATC-03**: Fuzzy matching for full terms via Levenshtein edit-distance (configurable; threshold scales with term length)
-- [ ] **MATC-04**: Overlapping matches resolved without duplication (acronym wins at same position when both match)
+- [x] **MATC-01**: Terms matched by acronym only, full term only, or both (configurable via matchBy setting)
+- [x] **MATC-02**: Case sensitivity configurable — acronyms always case-sensitive in 2-col tables; configurable for 3-col table terms
+- [x] **MATC-03**: Fuzzy matching for full terms via Levenshtein edit-distance (configurable; threshold scales with term length)
+- [x] **MATC-04**: Overlapping matches resolved without duplication (acronym wins at same position when both match)
 - [x] **MATC-05**: Specific acronyms can be excluded from matching via excludeAcronyms list
 - [x] **MATC-06**: Specific terms can be excluded from matching via excludeTerms list
 
@@ -35,7 +35,7 @@ This is a fidelity rebuild. All requirements are in scope — no v2 deferral.
 
 - [ ] **HIGH-01**: Matched terms decorated with highlight mark in CodeMirror editor (visible ranges only, not full document)
 - [ ] **HIGH-02**: Terms inside inline code spans and fenced code blocks are not highlighted
-- [ ] **HIGH-03**: Glossary files themselves are not highlighted (terms defined there are not decorated)
+- [x] **HIGH-03**: Glossary files themselves are not highlighted (terms defined there are not decorated)
 - [ ] **HIGH-04**: 10 named gradient highlight styles available (gradient1–gradient10)
 - [ ] **HIGH-05**: Solid highlight style available with custom color picker
 
@@ -47,8 +47,8 @@ This is a fidelity rebuild. All requirements are in scope — no v2 deferral.
 
 ### Folder Scoping
 
-- [ ] **FOLD-01**: includeFolders setting limits highlighting to notes inside specified folder paths
-- [ ] **FOLD-02**: excludeFolders setting skips highlighting for notes inside specified folder paths
+- [x] **FOLD-01**: includeFolders setting limits highlighting to notes inside specified folder paths
+- [x] **FOLD-02**: excludeFolders setting skips highlighting for notes inside specified folder paths
 
 ### Settings UI
 
@@ -88,14 +88,14 @@ This is a fidelity rebuild. All requirements are in scope — no v2 deferral.
 | INDX-04 | Phase 4 | Complete |
 | MATC-05 | Phase 4 | Complete |
 | MATC-06 | Phase 4 | Complete |
-| MATC-01 | Phase 5 | Pending |
-| MATC-02 | Phase 5 | Pending |
-| MATC-03 | Phase 5 | Pending |
-| MATC-04 | Phase 5 | Pending |
+| MATC-01 | Phase 5 | Complete |
+| MATC-02 | Phase 5 | Complete |
+| MATC-03 | Phase 5 | Complete |
+| MATC-04 | Phase 5 | Complete |
 | HIGH-02 | Phase 5 | Pending |
-| HIGH-03 | Phase 5 | Pending |
-| FOLD-01 | Phase 5 | Pending |
-| FOLD-02 | Phase 5 | Pending |
+| HIGH-03 | Phase 5 | Complete |
+| FOLD-01 | Phase 5 | Complete |
+| FOLD-02 | Phase 5 | Complete |
 | HIGH-01 | Phase 6 | Pending |
 | HIGH-04 | Phase 6 | Pending |
 | HIGH-05 | Phase 6 | Pending |
