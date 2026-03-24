@@ -3,11 +3,13 @@ import { GlossarySettings, DEFAULT_SETTINGS } from "./settings";
 import { parseGlossaryFile } from "./index/tableParser";
 import { isGlossaryFile } from "./index/glossaryDetector";
 import type { TermIndex } from "./index/termIndex";
+import { TermMatcher } from "./matcher/termMatcher";
 
 export default class GlossaryPlugin extends Plugin {
   settings!: GlossarySettings;
   private termIndex: TermIndex = {};
   private debouncedRebuild!: Debouncer<[], void>;
+  matcher!: TermMatcher;
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -59,6 +61,7 @@ export default class GlossaryPlugin extends Plugin {
       termCount += await parseGlossaryFile(this.app, file, this.settings, this.termIndex);
     }
     console.log(`Glossary index built: ${termCount} terms from ${glossaryFiles.length} file(s)`);
+    this.matcher = new TermMatcher(this.termIndex, this.settings);
     if (!options.silent) {
       new Notice(`Rebuilt ${termCount} terms from ${glossaryFiles.length} files`);
     }
