@@ -88,6 +88,7 @@ export function buildStylesheet(settings: GlossarySettings): string {
 }
 .glossary-modal-errors {
   margin: 8px 0 4px;
+  min-height: 96px;
   font-size: var(--font-ui-small);
   color: var(--text-muted);
 }
