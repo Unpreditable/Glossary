@@ -20,12 +20,47 @@ const GRADIENTS: Record<string, string> = {
  * based on the current settings. Pure function — no DOM access.
  */
 export function buildStylesheet(settings: GlossarySettings): string {
+  let highlightRule: string;
+
   if (settings.highlightStyle === 'solid') {
-    return `.cm-glossary-highlight { text-decoration: underline; text-decoration-color: ${settings.highlightColor}; text-decoration-thickness: 2px; }`;
+    highlightRule = `
+.cm-glossary-highlight, .glossary-preview {
+  text-decoration: underline;
+  text-decoration-color: ${settings.highlightColor};
+  text-decoration-thickness: 2px;
+}`;
+  } else {
+    const grad = GRADIENTS[settings.highlightStyle];
+    highlightRule = `
+.cm-glossary-highlight, .glossary-preview {
+  background: ${grad};
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  border-bottom: 2px solid transparent;
+  border-image: ${grad} 0 0 100% 0;
+}`;
   }
 
-  const grad = GRADIENTS[settings.highlightStyle];
-  return `.cm-glossary-highlight { background: ${grad}; background-clip: text; -webkit-background-clip: text; color: transparent; border-bottom: 2px solid transparent; border-image: ${grad} 0 0 100% 0; }`;
+  const staticRules = `
+.cm-tooltip-glossary {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  max-width: 320px;
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+  line-height: 1.5;
+}
+.glossary-preview {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-weight: 500;
+}`;
+
+  return highlightRule + staticRules;
 }
 
 /**

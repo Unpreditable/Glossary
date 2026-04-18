@@ -7,6 +7,7 @@ import type { TermIndex } from "./index/termIndex";
 import { TermMatcher } from "./matcher/termMatcher";
 import { createGlossaryViewPlugin } from "./decorations/glossaryViewPlugin";
 import { injectGlossaryStyles, removeGlossaryStyles } from "./decorations/cssInjector";
+import { GlossarySettingTab } from "./settings/settingsTab";
 
 export default class GlossaryPlugin extends Plugin {
   settings!: GlossarySettings;
@@ -45,6 +46,8 @@ export default class GlossaryPlugin extends Plugin {
     this.app.workspace.onLayoutReady(() => {
       void this.buildGlossaryIndex({ silent: true });
     });
+
+    this.addSettingTab(new GlossarySettingTab(this.app, this));
   }
 
   onunload(): void {
