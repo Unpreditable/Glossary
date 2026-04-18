@@ -40,6 +40,18 @@ Index is rebuilt on `onload` and debounced (5 s) on every glossary file `modify`
 
 **Circular dependency guard**: `glossaryViewPlugin.ts` uses a local `PluginRef` interface instead of importing `GlossaryPlugin` from `main.ts` to avoid a circular import.
 
+## Reference file
+
+`reference/main.js` is a bundled snapshot of an earlier monolithic version of this plugin. It is the **feature reference** for this rewrite — use it to understand what was originally implemented and how. Do NOT copy code from it directly; the rewrite uses a better modular architecture. When in doubt about intended behavior, check the reference.
+
+## After every code change
+
+After making any code change, **always run `npm run build`** so the output `main.js` is updated and can be hot-reloaded in Obsidian for testing:
+
+```bash
+npm run build
+```
+
 ## Key constraints
 
 - All CodeMirror packages (`@codemirror/*`, `@lezer/*`) and `obsidian` are `external` in esbuild — they must never be bundled; they are provided by Obsidian at runtime.
