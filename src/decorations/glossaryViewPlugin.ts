@@ -78,10 +78,13 @@ export class GlossaryViewPlugin {
   }
 
   private buildDecorations(view: EditorView): DecorationSet {
-    // Guard: if matcher is not yet initialised, return empty set.
-    // shouldProcessFile is intentionally skipped here — buildGlossaryIndex()
-    // only populates termIndex for processable files, so the index is already filtered.
     if (!this.plugin?.matcher) {
+      return new RangeSetBuilder<Decoration>().finish();
+    }
+
+    const activeFile = this.plugin.app.workspace.getActiveFile();
+    if (!activeFile || !this.plugin.matcher.shouldProcessFile(this.plugin.app, activeFile)) {
+      this.lineCache.clear();
       return new RangeSetBuilder<Decoration>().finish();
     }
 
