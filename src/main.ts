@@ -7,6 +7,7 @@ import type { TermIndex } from "./index/termIndex";
 import { TermMatcher } from "./matcher/termMatcher";
 import { createGlossaryViewPlugin } from "./decorations/glossaryViewPlugin";
 import { injectGlossaryStyles, removeGlossaryStyles } from "./decorations/cssInjector";
+import { createTooltipExtension } from "./decorations/tooltipExtension";
 import { GlossarySettingTab } from "./settings/settingsTab";
 
 export default class GlossaryPlugin extends Plugin {
@@ -20,7 +21,10 @@ export default class GlossaryPlugin extends Plugin {
     await this.loadSettings();
     injectGlossaryStyles(this.settings);
     this.viewPluginSpec = createGlossaryViewPlugin(this);
-    this.registerEditorExtension(this.viewPluginSpec);
+    this.registerEditorExtension([
+      this.viewPluginSpec,
+      createTooltipExtension(this.viewPluginSpec),
+    ]);
     console.log("Smart Glossary loaded");
 
     this.debouncedRebuild = debounce(
