@@ -9,10 +9,11 @@ import { createGlossaryViewPlugin } from "./decorations/glossaryViewPlugin";
 import { injectGlossaryStyles, removeGlossaryStyles } from "./decorations/cssInjector";
 import { createTooltipExtension } from "./decorations/tooltipExtension";
 import { GlossarySettingTab } from "./settings/settingsTab";
+import { AddTermModal } from "./glossary/addTermModal";
 
 export default class GlossaryPlugin extends Plugin {
   settings!: GlossarySettings;
-  private termIndex: TermIndex = {};
+  termIndex: TermIndex = {};
   private debouncedRebuild!: Debouncer<[], void>;
   matcher!: TermMatcher;
   private viewPluginSpec!: ReturnType<typeof createGlossaryViewPlugin>;
@@ -46,6 +47,21 @@ export default class GlossaryPlugin extends Plugin {
       name: "Refresh glossary index",
       callback: () => { void this.buildGlossaryIndex(); },
     });
+
+    this.registerEvent(
+      this.app.workspace.on('editor-menu', (menu, editor) => {
+        let text = editor.getSelection().trim();
+        if (!text) {
+          const wordRange = editor.wordAt(editor.getCursor());
+          if (wordRange) text = editor.getRange(wordRange.from, wordRange.to);
+        }
+        menu.addItem(item => item
+          .setTitle('Add to glossary')
+          .setIcon('book-plus')
+          .onClick(() => new AddTermModal(this.app, this, text).open()),
+        );
+      }),
+    );
 
     this.app.workspace.onLayoutReady(() => {
       void this.buildGlossaryIndex({ silent: true });

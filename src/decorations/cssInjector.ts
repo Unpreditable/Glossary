@@ -60,7 +60,58 @@ export function buildStylesheet(settings: GlossarySettings): string {
   font-weight: 500;
 }`;
 
-  return highlightRule + staticRules;
+  const modalRules = `
+.glossary-add-modal input::placeholder {
+  color: var(--text-faint) !important;
+  opacity: 0.6;
+  font-style: italic;
+}
+.glossary-modal-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.glossary-modal-row input {
+  flex: 1;
+  min-width: 0;
+}
+.glossary-modal-full {
+  margin-bottom: 8px;
+}
+.glossary-modal-full input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.glossary-input-invalid {
+  border-color: var(--color-red, #e03e3e) !important;
+  outline-color: var(--color-red, #e03e3e) !important;
+}
+.glossary-modal-errors {
+  margin: 8px 0 4px;
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+}
+.glossary-modal-errors strong {
+  color: var(--text-normal);
+}
+.glossary-modal-error-list {
+  margin: 2px 0 0 16px;
+  padding: 0;
+}
+.glossary-modal-duplicates {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: rgba(255, 160, 0, 0.08);
+  border: 1px solid var(--background-modifier-border);
+  font-size: var(--font-ui-small);
+}
+.glossary-modal-duplicate-list {
+  margin: 4px 0 0 16px;
+  padding: 0;
+}`;
+
+  return highlightRule + staticRules + modalRules;
 }
 
 /**
