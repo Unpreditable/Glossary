@@ -5,6 +5,7 @@ import {
   writeRowToContent,
   insertRowAlphabeticallyInContent,
   sortTableInContent,
+  setColWidthsInContent,
 } from './glossaryFileParser';
 import type { ViewRow, ViewTable } from './glossaryFileParser';
 
@@ -66,6 +67,7 @@ export class GlossaryItemView extends ItemView {
     if (typeof state['file'] === 'string' && state['file'] !== this.filePath) {
       this.filePath = state['file'];
       this.searchQuery = '';
+      this.contentEl.scrollTop = 0;
       await this.loadAndRender();
     }
   }
@@ -83,6 +85,7 @@ export class GlossaryItemView extends ItemView {
 
   private render(): void {
     const { contentEl } = this;
+    const scrollTop = contentEl.scrollTop;
     contentEl.empty();
     contentEl.addClass('glossary-item-view');
 
@@ -126,6 +129,7 @@ export class GlossaryItemView extends ItemView {
     }
 
     if (this.searchQuery) this.applySearch();
+    contentEl.scrollTop = scrollTop;
   }
 
   private renderSection(section: HTMLElement, table: ViewTable): void {
@@ -133,16 +137,17 @@ export class GlossaryItemView extends ItemView {
     const tableEl = section.createEl('table', { cls: 'glossary-view-table' });
 
     const colgroup = tableEl.createEl('colgroup');
-    const widths = table.colCount === 3 ? ['12%', '25%', '63%'] : ['18%', '82%'];
-    for (const w of widths) {
+    const defaults = table.colCount === 3 ? [12, 25, 63] : table.colCount === 2 ? [18, 82] : null;
+    const widths = table.colWidths ?? defaults;
+    for (let c = 0; c < table.colCount; c++) {
       const col = colgroup.createEl('col');
-      col.style.width = w;
+      if (widths) col.style.width = `${widths[c]}%`;
     }
 
     const thead = tableEl.createEl('thead');
     const headerTr = thead.createEl('tr');
     for (const h of table.headerCells) headerTr.createEl('th', { text: h });
-    this.attachColResizer(thead, colgroup, table.colCount);
+    this.attachColResizer(thead, colgroup, table);
 
     const tbody = tableEl.createEl('tbody');
     for (const row of table.rows) this.renderExistingRow(tbody, table, row);
@@ -356,7 +361,8 @@ export class GlossaryItemView extends ItemView {
     if (sectionEl && updatedTable) { this.renderSection(sectionEl, updatedTable); this.applySearch(); }
   }
 
-  private attachColResizer(thead: HTMLElement, colgroup: HTMLElement, colCount: number): void {
+  private attachColResizer(thead: HTMLElement, colgroup: HTMLElement, table: ViewTable): void {
+    const colCount = table.colCount;
     const cols = Array.from(colgroup.children) as HTMLElement[];
     const ths = Array.from(thead.querySelectorAll('th')) as HTMLElement[];
     const MIN_W = 60;
@@ -380,11 +386,53 @@ export class GlossaryItemView extends ItemView {
         const onUp = () => {
           document.removeEventListener('mousemove', onMove);
           document.removeEventListener('mouseup', onUp);
+          void this.saveColWidths(table, ths);
         };
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
       });
     }
+  }
+
+  // Stores widths as integer percentages summing to 100 in a comment above the table.
+  private async saveColWidths(table: ViewTable, ths: HTMLElement[]): Promise<void> {
+    const px = ths.map(th => th.offsetWidth);
+    const total = px.reduce((a, b) => a + b, 0);
+    if (total === 0) return;
+    const pct = px.map(w => Math.round((w / total) * 100));
+    pct[pct.length - 1] += 100 - pct.reduce((a, b) => a + b, 0);
+
+    const file = this.app.vault.getAbstractFileByPath(this.filePath);
+    if (!(file instanceof TFile)) return;
+    const updated = setColWidthsInContent(await this.app.vault.read(file), table, pct);
+    await this.app.vault.modify(file, updated);
+    this.syncTables(updated);
+  }
+
+  // Re-parses the file. If its content matches what the DOM shows, only line offsets
+  // are patched into the existing table objects (row handlers hold references to them),
+  // so the view isn't rebuilt and scroll position is kept. Otherwise re-renders.
+  private syncTables(content: string): void {
+    const parsed = parseFileTables(content);
+    const sameContent = parsed.length === this.tables.length && parsed.every((p, i) => {
+      const t = this.tables[i];
+      return p.colCount === t.colCount &&
+        p.headerCells.join('\x00') === t.headerCells.join('\x00') &&
+        p.rows.length === t.rows.length &&
+        p.rows.every((r, j) => r.cells.join('\x00') === t.rows[j].cells.join('\x00'));
+    });
+
+    if (!sameContent) {
+      this.tables = parsed;
+      this.render();
+      return;
+    }
+    parsed.forEach((p, i) => {
+      const t = this.tables[i];
+      t.headerLineIdx = p.headerLineIdx;
+      t.colWidths = p.colWidths;
+      t.colWidthsLineIdx = p.colWidthsLineIdx;
+    });
   }
 
   private applySearch(): void {

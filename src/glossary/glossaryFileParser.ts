@@ -9,6 +9,23 @@ export interface ViewTable {
   colCount: number;
   rows: ViewRow[];
   headerLineIdx: number;
+  /** Column widths in percent, from a `%%glossary_column_width=10|40|50%%` line above the table. */
+  colWidths: number[] | null;
+  colWidthsLineIdx: number | null;
+}
+
+const COL_WIDTH_RE = /^\s*%%\s*glossary_column_width\s*=\s*([\d.\s|]+?)\s*%%\s*$/;
+
+// Looks for the width comment on the nearest non-blank line above the header.
+function findColWidths(lines: string[], headerLineIdx: number, colCount: number): { widths: number[] | null; lineIdx: number | null } {
+  let k = headerLineIdx - 1;
+  while (k >= 0 && lines[k].trim() === '') k--;
+  const m = k >= 0 ? COL_WIDTH_RE.exec(lines[k]) : null;
+  if (!m) return { widths: null, lineIdx: null };
+  const nums = m[1].split('|').map(n => parseFloat(n));
+  const sum = nums.reduce((a, b) => a + b, 0);
+  const valid = nums.length === colCount && nums.every(n => n > 0) && sum > 0;
+  return { widths: valid ? nums.map(n => (n / sum) * 100) : null, lineIdx: k };
 }
 
 function parseCells(line: string): string[] {
@@ -50,7 +67,11 @@ export function parseFileTables(content: string): ViewTable[] {
         }
         j++;
       }
-      tables.push({ tableIdx: tables.length, headerCells, colCount, rows, headerLineIdx });
+      const { widths, lineIdx } = findColWidths(lines, headerLineIdx, colCount);
+      tables.push({
+        tableIdx: tables.length, headerCells, colCount, rows, headerLineIdx,
+        colWidths: widths, colWidthsLineIdx: lineIdx,
+      });
       i = j;
     } else {
       i++;
@@ -114,6 +135,21 @@ export function sortTableInContent(
   const dataStart = table.headerLineIdx + 2;
   for (let i = 0; i < sortedRows.length; i++) {
     lines[dataStart + i] = buildRowLine(sortedRows[i].cells);
+  }
+  return lines.join('\n');
+}
+
+export function setColWidthsInContent(
+  content: string,
+  table: ViewTable,
+  widths: number[],
+): string {
+  const lines = content.split('\n');
+  const line = `%%glossary_column_width=${widths.join('|')}%%`;
+  if (table.colWidthsLineIdx !== null) {
+    lines[table.colWidthsLineIdx] = line;
+  } else {
+    lines.splice(table.headerLineIdx, 0, line);
   }
   return lines.join('\n');
 }

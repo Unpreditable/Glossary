@@ -109,7 +109,7 @@ export default class GlossaryPlugin extends Plugin {
   }
 
   onunload(): void {
-    this.app.workspace.detachLeavesOfType(GLOSSARY_VIEW_TYPE);
+    // Don't detach glossary leaves: Obsidian restores them when the view is re-registered on reload.
     removeGlossaryStyles();
   }
 
