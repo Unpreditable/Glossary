@@ -1,4 +1,4 @@
-import { Plugin, TFile, TAbstractFile, debounce, Debouncer, MarkdownView, Notice } from "obsidian";
+import { Plugin, TFile, TAbstractFile, debounce, Debouncer, MarkdownView, Notice, WorkspaceLeaf } from "obsidian";
 import type { EditorView } from "@codemirror/view";
 import { GlossarySettings, DEFAULT_SETTINGS } from "./settings";
 import { parseGlossaryFile } from "./index/tableParser";
@@ -10,10 +10,13 @@ import { injectGlossaryStyles, removeGlossaryStyles } from "./decorations/cssInj
 import { createTooltipExtension } from "./decorations/tooltipExtension";
 import { GlossarySettingTab } from "./settings/settingsTab";
 import { AddTermModal } from "./glossary/addTermModal";
+import { GlossaryItemView, GLOSSARY_VIEW_TYPE } from "./glossary/glossaryView";
 
 export default class GlossaryPlugin extends Plugin {
   settings!: GlossarySettings;
   termIndex: TermIndex = {};
+  fileViewPreference: Map<string, 'glossary' | 'markdown'> = new Map();
+  private recentlyHandled = new Set<string>();
   private debouncedRebuild!: Debouncer<[], void>;
   matcher!: TermMatcher;
   private viewPluginSpec!: ReturnType<typeof createGlossaryViewPlugin>;
@@ -31,7 +34,7 @@ export default class GlossaryPlugin extends Plugin {
     this.debouncedRebuild = debounce(
       () => { void this.buildGlossaryIndex({ silent: true }); },
       5000,
-      true  // resetTimer: reset window on each glossary file save
+      true
     );
 
     this.registerEvent(
@@ -63,15 +66,105 @@ export default class GlossaryPlugin extends Plugin {
       }),
     );
 
+    this.registerView(GLOSSARY_VIEW_TYPE, (leaf) => new GlossaryItemView(leaf, this));
+
+    // Primary: fires when switching tabs or opening a file in a new leaf
+    this.registerEvent(
+      this.app.workspace.on('active-leaf-change', (leaf) => {
+        if (!leaf || leaf.view.getViewType() !== 'markdown') return;
+        setTimeout(() => {
+          if (leaf.view.getViewType() !== 'markdown') return;
+          const file = (leaf.view as MarkdownView).file;
+          if (!file || !isGlossaryFile(this.app, file)) return;
+          this.handleGlossaryLeaf(leaf, file.path);
+        }, 0);
+      }),
+    );
+
+    // Fallback: fires when a file opens in the already-active leaf (active-leaf-change won't fire then)
+    this.registerEvent(
+      this.app.workspace.on('file-open', (file) => {
+        if (!file || !isGlossaryFile(this.app, file)) return;
+        setTimeout(() => {
+          this.app.workspace.iterateAllLeaves((leaf) => {
+            if (leaf.view.getViewType() === 'markdown' &&
+                (leaf.view as MarkdownView).file?.path === file.path) {
+              this.handleGlossaryLeaf(leaf, file.path);
+            }
+          });
+        }, 0);
+      }),
+    );
+
     this.app.workspace.onLayoutReady(() => {
       void this.buildGlossaryIndex({ silent: true });
+      this.scanGlossaryLeaves();
+      const ref = this.app.metadataCache.on('resolved', () => {
+        this.scanGlossaryLeaves();
+        this.app.metadataCache.offref(ref);
+      });
     });
 
     this.addSettingTab(new GlossarySettingTab(this.app, this));
   }
 
   onunload(): void {
+    this.app.workspace.detachLeavesOfType(GLOSSARY_VIEW_TYPE);
     removeGlossaryStyles();
+  }
+
+  // Restored leaves on cold start don't reliably fire active-leaf-change/file-open
+  private scanGlossaryLeaves(): void {
+    this.app.workspace.iterateAllLeaves((leaf) => {
+      if (leaf.view.getViewType() !== 'markdown') return;
+      const file = (leaf.view as MarkdownView).file;
+      if (!file || !isGlossaryFile(this.app, file)) return;
+      this.handleGlossaryLeaf(leaf, file.path);
+    });
+  }
+
+  private handleGlossaryLeaf(leaf: WorkspaceLeaf, filePath: string): void {
+    if (this.recentlyHandled.has(filePath)) return;
+    this.recentlyHandled.add(filePath);
+    setTimeout(() => this.recentlyHandled.delete(filePath), 1500);
+
+    const pref = this.fileViewPreference.get(filePath) ?? 'glossary';
+    if (pref === 'markdown') {
+      this.injectGlossaryPrompt(leaf, filePath);
+    } else {
+      void this.redirectToGlossaryView(leaf, filePath);
+    }
+  }
+
+  // Obsidian's own openFile flow is async and can overwrite our setViewState
+  // if we fire too early. Retry with backoff until the view actually sticks.
+  private async redirectToGlossaryView(leaf: WorkspaceLeaf, filePath: string): Promise<void> {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await new Promise<void>((r) => setTimeout(r, 80 + attempt * 120));
+      const viewType = leaf.view.getViewType();
+      if (viewType !== 'markdown') return;
+      if ((leaf.view as MarkdownView).file?.path !== filePath) return;
+      await leaf.setViewState({ type: GLOSSARY_VIEW_TYPE, state: { file: filePath }, active: true });
+      if (leaf.view.getViewType() === GLOSSARY_VIEW_TYPE) return;
+    }
+  }
+
+  injectGlossaryPrompt(leaf: WorkspaceLeaf, filePath: string): void {
+    const sourceViewEl = leaf.view.containerEl.querySelector('.markdown-source-view');
+    const cmEditor = sourceViewEl?.querySelector('.cm-editor');
+    if (!sourceViewEl || !cmEditor) return;
+    sourceViewEl.querySelector('.glossary-source-prompt')?.remove();
+    const prompt = document.createElement('div');
+    prompt.className = 'glossary-source-prompt';
+    const btn = document.createElement('button');
+    btn.textContent = 'Open as Glossary View';
+    btn.className = 'glossary-view-source-btn';
+    btn.addEventListener('click', () => {
+      this.fileViewPreference.set(filePath, 'glossary');
+      void leaf.setViewState({ type: GLOSSARY_VIEW_TYPE, state: { file: filePath }, active: true });
+    });
+    prompt.appendChild(btn);
+    sourceViewEl.insertBefore(prompt, cmEditor);
   }
 
   refreshStyles(): void {
