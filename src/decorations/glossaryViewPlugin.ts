@@ -42,11 +42,18 @@ interface PluginRef {
 }
 
 const LOOKAHEAD_BYTES = 4000; // approx 50 lines × 80 chars
+/** The line cache is dropped wholesale past this many distinct lines; it refills from what's visible. */
+const MAX_CACHED_LINES = 5000;
 
 export class GlossaryViewPlugin {
   decorations: DecorationSet;
   forceRebuild = false;
-  private lineCache: Map<number, TermMatch[]> = new Map();
+  /**
+   * Matches per line, keyed by the line's text, with positions relative to the line start.
+   * A line's matches depend only on its text, so entries stay valid however lines move;
+   * forceRebuild clears it when the index or settings change.
+   */
+  private lineCache: Map<string, TermMatch[]> = new Map();
 
   constructor(view: EditorView, private plugin: PluginRef) {
     if (!this.plugin?.matcher) {
@@ -61,20 +68,21 @@ export class GlossaryViewPlugin {
       this.lineCache.clear();
       this.forceRebuild = false;
       this.decorations = this.buildDecorations(update.view);
-    } else if (update.docChanged) {
-      this.evictChangedLines(update);
-      this.decorations = this.buildDecorations(update.view);
-    } else if (update.viewportChanged) {
+    } else if (update.docChanged || update.viewportChanged) {
       this.decorations = this.buildDecorations(update.view);
     }
     // cursor-only (no docChanged, no viewportChanged): no-op
   }
 
-  private evictChangedLines(update: ViewUpdate): void {
-    update.changes.iterChanges((fromA: number) => {
-      const line = update.startState.doc.lineAt(fromA);
-      this.lineCache.delete(line.from);
-    });
+  /** The line's matches relative to its start, from the cache or freshly computed. */
+  private lineMatches(text: string, matcher: TermMatcher): TermMatch[] {
+    let matches = this.lineCache.get(text);
+    if (!matches) {
+      if (this.lineCache.size >= MAX_CACHED_LINES) this.lineCache.clear();
+      matches = matcher.findTermsInText(text, 0);
+      this.lineCache.set(text, matches);
+    }
+    return matches;
   }
 
   private buildDecorations(view: EditorView): DecorationSet {
@@ -99,10 +107,7 @@ export class GlossaryViewPlugin {
 
       let lineObj = doc.lineAt(range.from);
       while (lineObj.from <= scanTo) {
-        if (!this.lineCache.has(lineObj.from)) {
-          const matches = this.plugin.matcher.findTermsInText(lineObj.text, lineObj.from);
-          this.lineCache.set(lineObj.from, matches);
-        }
+        this.lineMatches(lineObj.text, this.plugin.matcher);
         if (lineObj.to >= doc.length) break;
         lineObj = doc.lineAt(lineObj.to + 1);
       }
@@ -119,24 +124,23 @@ export class GlossaryViewPlugin {
       while (lineObj.from <= range.to) {
         // Skip entire lines that are inside a fenced code block
         if (!fencedLineOffsets.has(lineObj.from)) {
-          const cached = this.lineCache.get(lineObj.from);
-          if (cached) {
-            for (const match of cached) {
-              if (
-                match.from >= range.from &&
-                match.to <= range.to &&
-                !isInInlineCode(lineObj.text, lineObj.from, match.from) &&
-                !isInCodeBlock(view, match.from)
-              ) {
-                builder.add(
-                  match.from,
-                  match.to,
-                  Decoration.mark({
-                    class: "cm-glossary-highlight",
-                    attributes: { "data-terms": JSON.stringify(match.terms) },
-                  }),
-                );
-              }
+          for (const match of this.lineMatches(lineObj.text, this.plugin.matcher)) {
+            const from = lineObj.from + match.from;
+            const to = lineObj.from + match.to;
+            if (
+              from >= range.from &&
+              to <= range.to &&
+              !isInInlineCode(lineObj.text, lineObj.from, from) &&
+              !isInCodeBlock(view, from)
+            ) {
+              builder.add(
+                from,
+                to,
+                Decoration.mark({
+                  class: "cm-glossary-highlight",
+                  attributes: { "data-terms": JSON.stringify(match.terms) },
+                }),
+              );
             }
           }
         }
