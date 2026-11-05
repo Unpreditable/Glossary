@@ -123,20 +123,6 @@ export function insertRowAlphabeticallyInContent(
   return lines.join('\n');
 }
 
-export function sortTableInContent(
-  content: string,
-  table: ViewTable,
-  sortedRows: ViewRow[],
-): string {
-  const lines = content.split('\n');
-  const fresh = freshTable(lines, table);
-  if (!fresh) return content;
-  fresh.rows.forEach((r, i) => {
-    if (sortedRows[i]) lines[r.lineIdx] = buildRowLine(sortedRows[i].cells);
-  });
-  return lines.join('\n');
-}
-
 export function setColWidthsInContent(
   content: string,
   table: ViewTable,

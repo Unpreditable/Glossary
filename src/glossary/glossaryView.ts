@@ -4,7 +4,6 @@ import {
   parseFileTables,
   writeRowToContent,
   insertRowAlphabeticallyInContent,
-  sortTableInContent,
   setColWidthsInContent,
 } from './glossaryFileParser';
 import type { ViewRow, ViewTable } from './glossaryFileParser';
@@ -395,18 +394,6 @@ export class GlossaryItemView extends ItemView {
       const target = this.tables[table.tableIdx];
       if (tbody && target) this.addNewRow(tbody, target);
     }
-  }
-
-  private async sortTable(table: ViewTable): Promise<void> {
-    const sorted = [...table.rows].sort((a, b) => (a.cells[0] ?? '').localeCompare(b.cells[0] ?? ''));
-    const file = this.app.vault.getAbstractFileByPath(this.filePath);
-    if (!(file instanceof TFile)) return;
-    const updated = sortTableInContent(await this.app.vault.read(file), table, sorted);
-    await this.write(file, updated);
-    this.tables = parseFileTables(updated);
-    const sectionEl = this.sectionEls[table.tableIdx];
-    const updatedTable = this.tables[table.tableIdx];
-    if (sectionEl && updatedTable) { this.renderSection(sectionEl, updatedTable); this.applySearch(); }
   }
 
   private attachColResizer(thead: HTMLElement, colgroup: HTMLElement, table: ViewTable): void {

@@ -2,7 +2,6 @@ import {
   parseFileTables,
   writeRowToContent,
   insertRowAlphabeticallyInContent,
-  sortTableInContent,
   setColWidthsInContent,
 } from '../../src/glossary/glossaryFileParser';
 
@@ -71,16 +70,6 @@ describe('writers on a table with an empty row', () => {
     const out = lines(insertRowAlphabeticallyInContent(CONTENT, business, ['ZZZ', 'Last']));
     expect(out[13]).toBe('| ZZZ | Last |');
   });
-
-  it('sortTableInContent writes rows to their lines and leaves the empty row', () => {
-    const reversed = [...business.rows].reverse();
-    const out = lines(sortTableInContent(CONTENT, business, reversed));
-    expect(out.slice(10, 13)).toEqual([
-      '| ROI | Gain relative to cost |',
-      '| | |',
-      '| KPI | A measured goal |',
-    ]);
-  });
 });
 
 describe('writers with a stale table', () => {
@@ -98,7 +87,6 @@ describe('writers with a stale table', () => {
     const oneTable = lines(CONTENT).slice(0, 6).join('\n');
     expect(writeRowToContent(oneTable, business, 0, ['X', 'Y'])).toBe(oneTable);
     expect(insertRowAlphabeticallyInContent(oneTable, business, ['X', 'Y'])).toBe(oneTable);
-    expect(sortTableInContent(oneTable, business, business.rows)).toBe(oneTable);
     expect(setColWidthsInContent(oneTable, business, [50, 50])).toBe(oneTable);
   });
 });
