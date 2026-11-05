@@ -5,3 +5,9 @@ main.js
 
 e2e/.output/
 TODO.md
+
+# Local only: personal settings, planning notes, leftovers
+data.json
+.claude/settings.local.json
+package_json.json
+reference/

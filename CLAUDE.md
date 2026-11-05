@@ -50,7 +50,7 @@ Index is rebuilt on `onload` and debounced (5 s) on every glossary file `modify`
 
 ## Reference file
 
-`reference/main.js` is a bundled snapshot of an earlier monolithic version of this plugin. It is the **feature reference** for this rewrite — use it to understand what was originally implemented and how. Do NOT copy code from it directly; the rewrite uses a better modular architecture. When in doubt about intended behavior, check the reference.
+`reference/main.js` is a bundled snapshot of an earlier monolithic version of this plugin. It is the **feature reference** for this rewrite — use it to understand what was originally implemented and how. Do NOT copy code from it directly; the rewrite uses a better modular architecture. When in doubt about intended behavior, check the reference. It is local only (gitignored), so it may be missing from a fresh clone.
 
 ## After every code change
 
