@@ -87,6 +87,14 @@ export class GlossaryItemView extends ItemView {
     this.registerEvent(this.app.vault.on('modify', (file) => {
       if (file instanceof TFile && file.path === this.filePath) void this.syncFromFile(file);
     }));
+    // Follow the note when it's renamed or moved; saves look the file up by path.
+    this.registerEvent(this.app.vault.on('rename', (file, oldPath) => {
+      if (oldPath !== this.filePath) return;
+      this.filePath = file.path;
+      // Re-applying the view state with the new path refreshes the tab title and the saved
+      // layout; setState sees an unchanged path and keeps the table as it is.
+      void this.leaf.setViewState(this.leaf.getViewState());
+    }));
   }
 
   private async syncFromFile(file: TFile): Promise<void> {

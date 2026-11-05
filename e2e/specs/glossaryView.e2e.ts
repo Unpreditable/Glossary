@@ -159,6 +159,26 @@ describe("The Glossary View", () => {
     expect(await noteLines()).toContain("| NPS | Net Promoter Score | Loyalty measure |");
   });
 
+  it("keeps saving to the note after it is renamed", async () => {
+    const renamed = "Terms.md";
+    await browser.executeObsidian(async ({ app, obsidian }, from, to) => {
+      const file = app.vault.getAbstractFileByPath(from);
+      if (!(file instanceof obsidian.TFile)) throw new Error(`no ${from}`);
+      await app.fileManager.renameFile(file, to);
+    }, NOTE, renamed);
+
+    // The tab title follows the new name.
+    await browser.waitUntil(async () => (await browser.executeObsidian(({ app }, type) =>
+      app.workspace.getLeavesOfType(type)[0]?.getDisplayText(), VIEW_TYPE)) === "Terms", {
+      timeoutMsg: "the Glossary View tab kept the old name",
+    });
+
+    await editCell(cell(1, 2, 3), "Runs programs");
+    await browser.waitUntil(async () => (await obsidianPage.read(renamed)).includes("| CPU | Central Processing Unit | Runs programs |"), {
+      timeoutMsg: `${renamed} never got the edit made after the rename`,
+    });
+  });
+
   it("adds a row when Enter is pressed in the last row", async () => {
     await $(cell(1, 2, 2)).click();
     await browser.keys("Enter");

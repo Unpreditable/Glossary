@@ -68,6 +68,16 @@ export default class GlossaryPlugin extends Plugin {
 
     this.registerView(GLOSSARY_VIEW_TYPE, (leaf) => new GlossaryItemView(leaf, this));
 
+    // The per-file view preference is keyed by path; carry it over when a note is renamed.
+    this.registerEvent(
+      this.app.vault.on('rename', (file, oldPath) => {
+        const pref = this.fileViewPreference.get(oldPath);
+        if (pref === undefined) return;
+        this.fileViewPreference.delete(oldPath);
+        this.fileViewPreference.set(file.path, pref);
+      }),
+    );
+
     // Primary: fires when switching tabs or opening a file in a new leaf
     this.registerEvent(
       this.app.workspace.on('active-leaf-change', (leaf) => {
