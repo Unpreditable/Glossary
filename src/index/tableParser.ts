@@ -71,3 +71,17 @@ export async function parseGlossaryFile(
   }
   return count;
 }
+
+/** Reads every glossary file into a new index of its own. */
+export async function buildTermIndex(
+  app: App,
+  files: TFile[],
+  settings: GlossarySettings
+): Promise<{ termIndex: TermIndex; termCount: number }> {
+  const termIndex: TermIndex = {};
+  let termCount = 0;
+  for (const file of files) {
+    termCount += await parseGlossaryFile(app, file, settings, termIndex);
+  }
+  return { termIndex, termCount };
+}

@@ -1,7 +1,7 @@
 import { Plugin, TFile, TAbstractFile, debounce, Debouncer, MarkdownView, Notice, WorkspaceLeaf } from "obsidian";
 import type { EditorView } from "@codemirror/view";
 import { GlossarySettings, DEFAULT_SETTINGS } from "./settings";
-import { parseGlossaryFile } from "./index/tableParser";
+import { buildTermIndex } from "./index/tableParser";
 import { isGlossaryFile } from "./index/glossaryDetector";
 import type { TermIndex } from "./index/termIndex";
 import { TermMatcher } from "./matcher/termMatcher";
@@ -17,6 +17,7 @@ export default class GlossaryPlugin extends Plugin {
   termIndex: TermIndex = {};
   /** Paths of the glossary files the current index was built from. */
   private indexedFiles = new Set<string>();
+  private buildGeneration = 0;
   fileViewPreference: Map<string, 'glossary' | 'markdown'> = new Map();
   private recentlyHandled = new Set<string>();
   private debouncedRebuild!: Debouncer<[], void>;
@@ -221,14 +222,15 @@ export default class GlossaryPlugin extends Plugin {
   }
 
   async buildGlossaryIndex(options: { silent?: boolean } = {}): Promise<void> {
-    this.termIndex = {};
-    let termCount = 0;
+    // Builds overlap (settings, the add-term modal, the command, file events). Each fills its
+    // own index, and only the newest one to start is kept.
+    const generation = ++this.buildGeneration;
     const glossaryFiles = this.app.vault.getMarkdownFiles()
       .filter((file) => isGlossaryFile(this.app, file));
+    const { termIndex, termCount } = await buildTermIndex(this.app, glossaryFiles, this.settings);
+    if (generation !== this.buildGeneration) return;
+    this.termIndex = termIndex;
     this.indexedFiles = new Set(glossaryFiles.map((file) => file.path));
-    for (const file of glossaryFiles) {
-      termCount += await parseGlossaryFile(this.app, file, this.settings, this.termIndex);
-    }
     console.log(`Glossary index built: ${termCount} terms from ${glossaryFiles.length} file(s)`);
     this.matcher = new TermMatcher(this.termIndex, this.settings);
     // Open editors cache matches from the previous matcher (or none, on startup).

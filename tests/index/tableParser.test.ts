@@ -1,4 +1,4 @@
-import { parseGlossaryFile } from '../../src/index/tableParser';
+import { buildTermIndex, parseGlossaryFile } from '../../src/index/tableParser';
 import type { TermIndex } from '../../src/index/termIndex';
 import type { GlossarySettings } from '../../src/settings';
 import type { App } from 'obsidian';
@@ -58,5 +58,24 @@ describe('parseGlossaryFile', () => {
       '| X | Y | Z | W |',
     ].join('\n'));
     expect(count).toBe(0);
+  });
+});
+
+describe('buildTermIndex', () => {
+  it('gives overlapping builds an index each, with every term once', async () => {
+    const content = ['| A | B |', '|---|---|', '| API | A contract |'].join('\n');
+    // Reads resolve after a delay, so the two builds interleave.
+    const app = {
+      vault: { read: () => new Promise<string>((resolve) => setTimeout(() => resolve(content), 5)) },
+    } as unknown as App;
+    const files = [makeMockFile('one.md'), makeMockFile('two.md')];
+    const [first, second] = await Promise.all([
+      buildTermIndex(app, files, SETTINGS),
+      buildTermIndex(app, files, SETTINGS),
+    ]);
+    expect(first.termIndex).not.toBe(second.termIndex);
+    expect(first.termIndex['API']).toHaveLength(2); // one per file
+    expect(second.termIndex['API']).toHaveLength(2);
+    expect(first.termCount).toBe(2);
   });
 });
