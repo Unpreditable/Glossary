@@ -4,7 +4,7 @@
 // Written without imports: describe, it, expect, browser, $ and the helpers are globals the harness
 // provides.
 
-const PLUGIN = "obsidian-glossary";
+const PLUGIN = "glossary";
 const VIEW_TYPE = "glossary-view";
 const NOTE = "Glossary.md";
 

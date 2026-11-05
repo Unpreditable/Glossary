@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-glossary",
+  "name": "glossary",
   "version": "1.0.0",
   "description": "Highlights glossary terms in notes and shows definitions on hover",
   "main": "main.js",

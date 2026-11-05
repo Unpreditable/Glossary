@@ -106,7 +106,7 @@ itself a few seconds after a glossary changes.
 ## Installation
 
 Smart Glossary is not in the community plugin directory yet. To install it by hand, copy `main.js`
-and `manifest.json` from a release into `<vault>/.obsidian/plugins/obsidian-glossary/`, then turn
+and `manifest.json` from a release into `<vault>/.obsidian/plugins/glossary/`, then turn
 it on under **Settings → Community plugins**.
 
 ---

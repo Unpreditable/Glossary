@@ -25,7 +25,7 @@ describe("Highlighting in the editor", () => {
       ));
       if (!updated.includes("| ELS |")) throw new Error("the glossary row was not added");
       const commands = (app as unknown as { commands: { executeCommandById(id: string): boolean } }).commands;
-      commands.executeCommandById("obsidian-glossary:refresh-glossary");
+      commands.executeCommandById("glossary:refresh-glossary");
     });
 
     await browser.waitUntil(async () => {

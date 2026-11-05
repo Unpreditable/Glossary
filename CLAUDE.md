@@ -23,7 +23,7 @@ npm run test:e2e -- --spec glossaryView   # one spec file
 npm run test:all                           # unit tests, then e2e
 ```
 
-`test:e2e` and `test:all` run on this machine only. They open an Obsidian window that takes the keyboard until the run ends, so say so before starting one. Spec files in `e2e/specs/` must not gain imports; see [e2e/README.md](e2e/README.md). For manual checks: copy `main.js` + `manifest.json` into a vault's `.obsidian/plugins/obsidian-glossary/` folder and reload plugins.
+`test:e2e` and `test:all` run on this machine only. They open an Obsidian window that takes the keyboard until the run ends, so say so before starting one. Spec files in `e2e/specs/` must not gain imports; see [e2e/README.md](e2e/README.md). For manual checks: copy `main.js` + `manifest.json` into a vault's `.obsidian/plugins/glossary/` folder and reload plugins.
 
 ## Architecture
 
