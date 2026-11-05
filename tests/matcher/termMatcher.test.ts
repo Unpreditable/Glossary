@@ -2,6 +2,8 @@ import { TermMatcher, TermMatch } from '../../src/matcher/termMatcher';
 import type { TermIndex } from '../../src/index/termIndex';
 import type { GlossarySettings } from '../../src/settings';
 import { makeMockApp, makeMockFile } from '../fixtures/mockApp';
+import { parseGlossaryFile } from '../../src/index/tableParser';
+import type { App } from 'obsidian';
 
 function makeSettings(overrides: Partial<GlossarySettings> = {}): GlossarySettings {
   return {
@@ -259,5 +261,49 @@ describe('editDistance', () => {
   it('returns correct distance for Kubernetss vs Kubernetes', () => {
     const matcher = new TermMatcher({}, makeSettings());
     expect(matcher.editDistance('Kubernetss', 'Kubernetes')).toBe(1);
+  });
+});
+
+// ─── Index built by the real parser ──────────────────────────────────────────
+// A row with both an acronym and a full term puts one term object under both keys.
+
+describe('rows with both an acronym and a full term', () => {
+  const glossary = [
+    '| Acronym | Full term | Description |',
+    '|---|---|---|',
+    '| API | Application Programming Interface | A contract |',
+    '| AG | API Gateway | Routes requests |',
+  ].join('\n');
+
+  async function matcherFor(overrides: Partial<GlossarySettings>): Promise<TermMatcher> {
+    const settings = makeSettings(overrides);
+    const termIndex: TermIndex = {};
+    const app = { vault: { read: async () => glossary } } as unknown as App;
+    await parseGlossaryFile(app, makeMockFile('glossary.md'), settings, termIndex);
+    return new TermMatcher(termIndex, settings);
+  }
+
+  const matched = (m: TermMatcher, text: string) => m.findTermsInText(text, 0).map(x => x.matched);
+
+  it('matchBy=both highlights the acronym and the full term', async () => {
+    const m = await matcherFor({ matchBy: 'both' });
+    expect(matched(m, 'An API is an Application Programming Interface')).toEqual(['API', 'Application Programming Interface']);
+  });
+
+  it('matchBy=term highlights the full term only', async () => {
+    const m = await matcherFor({ matchBy: 'term' });
+    expect(matched(m, 'An API is an application programming interface')).toEqual(['application programming interface']);
+  });
+
+  it('matchBy=acronym highlights the acronym only', async () => {
+    const m = await matcherFor({ matchBy: 'acronym' });
+    expect(matched(m, 'An API is an Application Programming Interface')).toEqual(['API']);
+  });
+
+  it('the acronym wins a tie with a full term from a row that has an acronym', async () => {
+    const m = await matcherFor({ matchBy: 'both' });
+    const [hit] = m.findTermsInText('API Gateway', 0);
+    expect(hit.matched).toBe('API');
+    expect(hit.kind).toBe('acronym');
   });
 });

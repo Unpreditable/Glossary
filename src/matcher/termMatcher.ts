@@ -8,6 +8,17 @@ export interface TermMatch {
   to: number;
   matched: string;
   terms: GlossaryTerm[];
+  /** Whether this hit came from an acronym key or a full-term key of the index. */
+  kind: 'acronym' | 'term';
+}
+
+/**
+ * An index key is an acronym key when it is a row's acronym or that acronym's plural.
+ * A row with both an acronym and a full term shares one term object across both keys,
+ * so the term's fields alone can't tell which key is which.
+ */
+function isAcronymKey(key: string, terms: GlossaryTerm[]): boolean {
+  return terms.some(t => t.acronym !== undefined && (key === t.acronym || key === t.acronym + 's'));
 }
 
 const FUZZY_THRESHOLD_SHORT = 1;  // term.length < 6
@@ -34,11 +45,8 @@ export class TermMatcher {
     raw.sort((a, b) => {
       if (a.from !== b.from) return a.from - b.from;
       // acronym wins on tie
-      const aIsAcronym = a.terms[0]?.acronym !== undefined;
-      const bIsAcronym = b.terms[0]?.acronym !== undefined;
-      if (aIsAcronym && !bIsAcronym) return -1;
-      if (!aIsAcronym && bIsAcronym) return 1;
-      return 0;
+      if (a.kind === b.kind) return 0;
+      return a.kind === 'acronym' ? -1 : 1;
     });
 
     // Linear overlap filter — first winner stays, skip overlapping followers
@@ -55,9 +63,9 @@ export class TermMatcher {
   }
 
   private findAcronymMatches(text: string, matches: TermMatch[], lineStart: number): void {
-    for (const [, termsList] of Object.entries(this.termIndex)) {
+    for (const [key, termsList] of Object.entries(this.termIndex)) {
       const first = termsList[0];
-      if (!first?.acronym) continue;
+      if (!first?.acronym || !isAcronymKey(key, termsList)) continue;
 
       const pattern = `\\b${this.escapeRegex(first.acronym)}\\b`;
       // Acronyms are ALWAYS case-sensitive
@@ -66,16 +74,16 @@ export class TermMatcher {
       while ((match = regex.exec(text)) !== null) {
         const from = lineStart + match.index;
         const to = from + match[0].length;
-        matches.push({ from, to, matched: match[0], terms: termsList });
+        matches.push({ from, to, matched: match[0], terms: termsList, kind: 'acronym' });
       }
     }
   }
 
   private findTermMatches(text: string, matches: TermMatch[], lineStart: number): void {
-    for (const [, termsList] of Object.entries(this.termIndex)) {
+    for (const [key, termsList] of Object.entries(this.termIndex)) {
       const first = termsList[0];
-      // Only full-term entries that are NOT acronyms
-      if (!first?.fullTerm || first.acronym) continue;
+      // Full-term keys only; a row's acronym keys are matched by findAcronymMatches.
+      if (!first?.fullTerm || isAcronymKey(key, termsList)) continue;
 
       const flags = this.settings.caseSensitive ? 'g' : 'gi';
       const pattern = `\\b${this.escapeRegex(first.fullTerm)}\\b`;
@@ -84,7 +92,7 @@ export class TermMatcher {
       while ((match = regex.exec(text)) !== null) {
         const from = lineStart + match.index;
         const to = from + match[0].length;
-        matches.push({ from, to, matched: match[0], terms: termsList });
+        matches.push({ from, to, matched: match[0], terms: termsList, kind: 'term' });
       }
 
       // Also attempt fuzzy matching for full terms if enabled
@@ -112,7 +120,7 @@ export class TermMatcher {
       if (dist > 0 && dist <= threshold) {
         const from = lineStart + wordMatch.index;
         const to = from + word.length;
-        matches.push({ from, to, matched: word, terms });
+        matches.push({ from, to, matched: word, terms, kind: 'term' });
       }
     }
   }
