@@ -179,6 +179,28 @@ describe("The Glossary View", () => {
     });
   });
 
+  it("does not rewrite the note when cells are left unchanged", async () => {
+    // Count writes to the note from here on.
+    await browser.executeObsidian(({ app }, path) => {
+      const w = window as unknown as { glossaryWrites: number; glossaryWritesRef: unknown };
+      w.glossaryWrites = 0;
+      w.glossaryWritesRef = app.vault.on("modify", (file) => { if (file.path === path) w.glossaryWrites++; });
+    }, NOTE);
+
+    await $(cell(1, 1, 1)).click();
+    await browser.keys("Tab");
+    await browser.keys("Tab");
+    await browser.keys("Tab");
+    // Give any save a moment to land, then make sure none did.
+    await browser.pause(1000);
+    const writes = await browser.executeObsidian(({ app }) => {
+      const w = window as unknown as { glossaryWrites: number; glossaryWritesRef: import("obsidian").EventRef };
+      app.vault.offref(w.glossaryWritesRef);
+      return w.glossaryWrites;
+    });
+    expect(writes).toBe(0);
+  });
+
   it("adds a row when Enter is pressed in the last row", async () => {
     await $(cell(1, 2, 2)).click();
     await browser.keys("Enter");

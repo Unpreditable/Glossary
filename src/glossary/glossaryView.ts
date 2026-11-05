@@ -102,9 +102,18 @@ export class GlossaryItemView extends ItemView {
     this.syncTables(content);
   }
 
-  private async write(file: TFile, content: string): Promise<void> {
-    this.lastWritten = content;
-    await this.app.vault.modify(file, content);
+  /**
+   * Rewrites the note through vault.process, so reading and writing happen as one step and two
+   * saves close together can't undo each other. Returns the content as it now is.
+   */
+  private async write(file: TFile, transform: (content: string) => string): Promise<string> {
+    let updated = '';
+    await this.app.vault.process(file, (content) => {
+      updated = transform(content);
+      this.lastWritten = updated;
+      return updated;
+    });
+    return updated;
   }
 
   private async loadAndRender(): Promise<void> {
@@ -347,23 +356,29 @@ export class GlossaryItemView extends ItemView {
   private async saveExistingRow(table: ViewTable, rowIdx: number, cells: string[]): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
     if (!(file instanceof TFile)) return;
-    const content = await this.app.vault.read(file);
-    // The row must still hold what this view last showed for it; if the note changed and the
-    // view hasn't caught up, re-read instead of overwriting another term.
-    const current = parseFileTables(content)[table.tableIdx]?.rows[rowIdx];
-    if (!current || !sameCells(current.cells, table.rows[rowIdx].cells)) {
+    const shown = table.rows[rowIdx].cells;
+    // Leaving a cell saves its row; nothing to write if the row is as it was.
+    if (sameCells(shown, cells)) return;
+
+    let stale = false;
+    const content = await this.write(file, (content) => {
+      // The row must still hold what this view last showed for it; if the note changed and the
+      // view hasn't caught up, re-read instead of overwriting another term.
+      const current = parseFileTables(content)[table.tableIdx]?.rows[rowIdx];
+      stale = !current || !sameCells(current.cells, shown);
+      return stale ? content : writeRowToContent(content, table, rowIdx, cells);
+    });
+    if (stale) {
       this.syncTables(content);
       return;
     }
-    await this.write(file, writeRowToContent(content, table, rowIdx, cells));
     table.rows[rowIdx].cells = cells;
   }
 
   private async saveNewRow(table: ViewTable, cells: string[], tr: HTMLTableRowElement, inputs: HTMLInputElement[]): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
     if (!(file instanceof TFile)) return;
-    const updated = insertRowAlphabeticallyInContent(await this.app.vault.read(file), table, cells);
-    await this.write(file, updated);
+    const updated = await this.write(file, (content) => insertRowAlphabeticallyInContent(content, table, cells));
 
     // Mirror the insert in the in-memory model: the new row sits where the parsed
     // rows first diverge from ours. Later rows shift down, so renumber them.
@@ -439,8 +454,7 @@ export class GlossaryItemView extends ItemView {
 
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
     if (!(file instanceof TFile)) return;
-    const updated = setColWidthsInContent(await this.app.vault.read(file), table, pct);
-    await this.write(file, updated);
+    const updated = await this.write(file, (content) => setColWidthsInContent(content, table, pct));
     this.syncTables(updated);
   }
 
