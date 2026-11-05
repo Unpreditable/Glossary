@@ -43,6 +43,7 @@ export function buildStylesheet(settings: GlossarySettings): string {
   }
 
   const staticRules = `
+.cm-tooltip-glossary-source { color: var(--text-muted); }
 .cm-tooltip-glossary {
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
@@ -85,6 +86,11 @@ export function buildStylesheet(settings: GlossarySettings): string {
 .glossary-input-invalid {
   border-color: var(--color-red, #e03e3e) !important;
   outline-color: var(--color-red, #e03e3e) !important;
+}
+.glossary-modal-done {
+  text-align: center;
+  padding: 24px;
+  font-weight: 500;
 }
 .glossary-modal-errors {
   margin: 8px 0 4px;

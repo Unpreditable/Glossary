@@ -200,18 +200,18 @@ export class GlossaryItemView extends ItemView {
 
     const input = td.createEl('input', { type: 'text', cls: 'glossary-cell-input' });
     input.value = value;
-    input.style.display = 'none';
+    input.hide();
 
     display.addEventListener('click', () => {
-      display.style.display = 'none';
-      input.style.display = '';
+      display.hide();
+      input.show();
       input.focus();
       input.select();
     });
 
     input.addEventListener('blur', () => {
-      display.style.display = '';
-      input.style.display = 'none';
+      display.show();
+      input.hide();
       display.empty();
       renderInline(input.value || '\u00a0', display);
     });
@@ -291,7 +291,7 @@ export class GlossaryItemView extends ItemView {
           const currentTr = input.closest('tr');
           const nextTr = currentTr?.nextElementSibling as HTMLElement | null;
           if (nextTr) {
-            (nextTr.querySelector('.glossary-cell-display') as HTMLElement | null)?.click();
+            nextTr.querySelector<HTMLElement>('.glossary-cell-display')?.click();
           } else if (isNew && inputs.some(inp => inp.value.trim().length > 0)) {
             this.pendingAddRow = table.tableIdx;
             input.blur();
@@ -307,7 +307,7 @@ export class GlossaryItemView extends ItemView {
         setTimeout(() => {
           const nextTr = input.closest('tr')?.nextElementSibling as HTMLElement | null;
           if (nextTr) {
-            (Array.from(nextTr.querySelectorAll('.glossary-cell-display')) as HTMLElement[])[c]?.click();
+            nextTr.querySelectorAll<HTMLElement>('.glossary-cell-display')[c]?.click();
           }
         }, 0);
         return;
@@ -318,7 +318,7 @@ export class GlossaryItemView extends ItemView {
         setTimeout(() => {
           const prevTr = input.closest('tr')?.previousElementSibling as HTMLElement | null;
           if (prevTr) {
-            (Array.from(prevTr.querySelectorAll('.glossary-cell-display')) as HTMLElement[])[c]?.click();
+            prevTr.querySelectorAll<HTMLElement>('.glossary-cell-display')[c]?.click();
           }
         }, 0);
         return;
@@ -390,7 +390,7 @@ export class GlossaryItemView extends ItemView {
     if (this.pendingAddRow === table.tableIdx) {
       this.pendingAddRow = null;
       const tbody = inPlace
-        ? tr.parentElement as HTMLElement | null
+        ? tr.parentElement
         : this.sectionEls[table.tableIdx]?.querySelector('tbody') ?? null;
       const target = this.tables[table.tableIdx];
       if (tbody && target) this.addNewRow(tbody, target);

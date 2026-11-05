@@ -81,18 +81,19 @@ export class AddTermModal extends Modal {
         for (const f of glossaryFiles) dd.addOption(f.path, f.basename);
         dd.setValue(this.targetFile!.path)
           .onChange(v => {
-            this.targetFile = this.app.vault.getAbstractFileByPath(v) as TFile;
+            const file = this.app.vault.getAbstractFileByPath(v);
+            if (file instanceof TFile) this.targetFile = file;
           });
         dd.selectEl.disabled = glossaryFiles.length === 1;
       });
 
     // Errors section
     this.errorsSection = contentEl.createDiv({ cls: 'glossary-modal-errors' });
-    this.errorsSection.style.visibility = 'hidden';
+    this.errorsSection.setCssProps({ visibility: 'hidden' });
 
     // Duplicates section
     this.duplicatesSection = contentEl.createDiv({ cls: 'glossary-modal-duplicates' });
-    this.duplicatesSection.style.display = 'none';
+    this.duplicatesSection.hide();
 
     // Buttons
     new Setting(contentEl)
@@ -147,12 +148,12 @@ export class AddTermModal extends Modal {
 
     this.errorsSection.empty();
     if (allErrors.length > 0) {
-      this.errorsSection.style.visibility = 'visible';
+      this.errorsSection.setCssProps({ visibility: 'visible' });
       this.errorsSection.createEl('strong', { text: 'Before you add:' });
       const list = this.errorsSection.createEl('ul', { cls: 'glossary-modal-error-list' });
       for (const err of allErrors) list.createEl('li', { text: err });
     } else {
-      this.errorsSection.style.visibility = 'hidden';
+      this.errorsSection.setCssProps({ visibility: 'hidden' });
     }
 
     if (this.submitBtn) {
@@ -185,11 +186,11 @@ export class AddTermModal extends Modal {
     this.duplicatesSection.empty();
 
     if (matches.length === 0) {
-      this.duplicatesSection.style.display = 'none';
+      this.duplicatesSection.hide();
       return;
     }
 
-    this.duplicatesSection.style.display = '';
+    this.duplicatesSection.show();
     this.duplicatesSection.createEl('strong', { text: `Duplicate entries (${matches.length})` });
 
     const list = this.duplicatesSection.createEl('ul', { cls: 'glossary-modal-duplicate-list' });
@@ -214,7 +215,7 @@ export class AddTermModal extends Modal {
     const msg = contentEl.createEl('p', {
       text: `Added "${this.acronym || this.fullTerm}" to ${this.targetFile.basename} ✓`,
     });
-    msg.style.cssText = 'text-align:center;padding:24px;font-weight:500;';
+    msg.addClass('glossary-modal-done');
     setTimeout(() => this.close(), 1000);
   }
 

@@ -5,10 +5,30 @@ import type { GlossaryTerm } from '../index/termIndex';
 
 type ViewPluginSpec = ReturnType<typeof createGlossaryViewPlugin>;
 
-function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+/** The tooltip body: the first definition, a count of the others, and where it comes from. */
+function renderTooltip(terms: GlossaryTerm[]): HTMLElement {
+  const term = terms[0];
+  const dom = document.createElement('div');
+  dom.className = 'cm-tooltip-glossary';
+
+  // Each part is one line; createEl sets text, so nothing from the glossary is parsed as HTML.
+  const parts: Array<(el: HTMLElement) => void> = [];
+  if (term.acronym) parts.push(el => el.createEl('strong', { text: term.acronym }));
+  if (term.fullTerm) parts.push(el => el.createEl('strong', { text: term.fullTerm }));
+  if (term.description) parts.push(el => el.appendText(term.description ?? ''));
+  if (parts.length === 0) parts.push(el => el.appendText('No definition available'));
+  if (terms.length > 1) {
+    parts.push(el => el.createEl('small', { text: `(+${terms.length - 1} more definitions)` }));
+  }
+  if (term.sourceFile) {
+    parts.push(el => el.createEl('small', { text: term.sourceFile, cls: 'cm-tooltip-glossary-source' }));
+  }
+
+  parts.forEach((addPart, i) => {
+    if (i > 0) dom.createEl('br');
+    addPart(dom);
+  });
+  return dom;
 }
 
 export function createTooltipExtension(viewPluginSpec: ViewPluginSpec): Extension {
@@ -24,29 +44,11 @@ export function createTooltipExtension(viewPluginSpec: ViewPluginSpec): Extensio
       if (!termsData || pos < from || pos > to) return;
 
       const terms = JSON.parse(termsData) as GlossaryTerm[];
-      const term = terms[0];
-
       result = {
         pos: from,
         end: to,
         above: true,
-        create: (): { dom: HTMLElement } => {
-          const dom = document.createElement('div');
-          dom.className = 'cm-tooltip-glossary';
-
-          const parts: string[] = [];
-          if (term.acronym)   parts.push(`<strong>${escapeHtml(term.acronym)}</strong>`);
-          if (term.fullTerm)  parts.push(`<strong>${escapeHtml(term.fullTerm)}</strong>`);
-          if (term.description) parts.push(escapeHtml(term.description));
-          if (parts.length === 0) parts.push('No definition available');
-          if (terms.length > 1)
-            parts.push(`<small>(+${terms.length - 1} more definitions)</small>`);
-          if (term.sourceFile)
-            parts.push(`<small style="color:var(--text-muted)">${escapeHtml(term.sourceFile)}</small>`);
-
-          dom.innerHTML = parts.join('<br>');
-          return { dom };
-        },
+        create: () => ({ dom: renderTooltip(terms) }),
       };
     });
 

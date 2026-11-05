@@ -2,6 +2,11 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 import type GlossaryPlugin from '../main';
 import type { MatchBy, HighlightStyle } from '../settings';
 
+/** A comma-separated text field's value as a list, without blanks. */
+function parseList(value: string): string[] {
+  return value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+}
+
 export class GlossarySettingTab extends PluginSettingTab {
   constructor(app: App, private plugin: GlossaryPlugin) {
     super(app, plugin);
@@ -10,7 +15,6 @@ export class GlossarySettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl('h2', { text: 'Smart Glossary Settings' });
 
     // --- Match by ---
     new Setting(containerEl)
@@ -60,10 +64,9 @@ export class GlossarySettingTab extends PluginSettingTab {
         .addText(t => t
           .setPlaceholder('API, UI, CSS')
           .setValue(this.plugin.settings.excludeAcronyms.join(', '))
-          .inputEl.addEventListener('blur', async () => {
-            this.plugin.settings.excludeAcronyms = t.getValue()
-              .split(',').map(s => s.trim()).filter(s => s.length > 0);
-            await this.save();
+          .inputEl.addEventListener('blur', () => {
+            this.plugin.settings.excludeAcronyms = parseList(t.getValue());
+            void this.save();
           }),
         );
     }
@@ -76,10 +79,9 @@ export class GlossarySettingTab extends PluginSettingTab {
         .addText(t => t
           .setPlaceholder('data, system, process')
           .setValue(this.plugin.settings.excludeTerms.join(', '))
-          .inputEl.addEventListener('blur', async () => {
-            this.plugin.settings.excludeTerms = t.getValue()
-              .split(',').map(s => s.trim()).filter(s => s.length > 0);
-            await this.save();
+          .inputEl.addEventListener('blur', () => {
+            this.plugin.settings.excludeTerms = parseList(t.getValue());
+            void this.save();
           }),
         );
     }
@@ -138,10 +140,9 @@ export class GlossarySettingTab extends PluginSettingTab {
       .addText(t => t
         .setPlaceholder('folder1, folder2')
         .setValue(this.plugin.settings.includeFolders.join(', '))
-        .inputEl.addEventListener('blur', async () => {
-          this.plugin.settings.includeFolders = t.getValue()
-            .split(',').map(s => s.trim()).filter(s => s.length > 0);
-          await this.save();
+        .inputEl.addEventListener('blur', () => {
+          this.plugin.settings.includeFolders = parseList(t.getValue());
+          void this.save();
         }),
       );
 
@@ -152,10 +153,9 @@ export class GlossarySettingTab extends PluginSettingTab {
       .addText(t => t
         .setPlaceholder('Private, Archive')
         .setValue(this.plugin.settings.excludeFolders.join(', '))
-        .inputEl.addEventListener('blur', async () => {
-          this.plugin.settings.excludeFolders = t.getValue()
-            .split(',').map(s => s.trim()).filter(s => s.length > 0);
-          await this.save();
+        .inputEl.addEventListener('blur', () => {
+          this.plugin.settings.excludeFolders = parseList(t.getValue());
+          void this.save();
         }),
       );
   }
