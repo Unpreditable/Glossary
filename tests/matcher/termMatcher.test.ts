@@ -23,8 +23,10 @@ function makeSettings(overrides: Partial<GlossarySettings> = {}): GlossarySettin
 // ─── MATC-01: matchBy routing ───────────────────────────────────────────────
 
 describe('MATC-01: matchBy routing', () => {
+  // The acronym comes from a 3-column row (it has a full term); 2-column rows always match
+  // by acronym, see 'rows from 2-column tables' below.
   const termIndex: TermIndex = {
-    'API': [{ sourceFile: 'glossary.md', acronym: 'API' }],
+    'API': [{ sourceFile: 'glossary.md', acronym: 'API', fullTerm: 'Some API' }],
     'application-programming-interface': [{ sourceFile: 'glossary.md', fullTerm: 'application-programming-interface' }],
   };
 
@@ -312,5 +314,35 @@ describe('rows with both an acronym and a full term', () => {
     const [hit] = m.findTermsInText('API Gateway', 0);
     expect(hit.matched).toBe('API');
     expect(hit.kind).toBe('acronym');
+  });
+});
+
+describe('rows from 2-column tables', () => {
+  const glossary = [
+    '| Acronym | Description |',
+    '|---|---|',
+    '| CPU | Executes instructions |',
+    '',
+    '| Acronym | Full term | Description |',
+    '|---|---|---|',
+    '| API | Application Programming Interface | A contract |',
+  ].join('\n');
+
+  async function matched(matchBy: GlossarySettings['matchBy'], text: string): Promise<string[]> {
+    const settings = makeSettings({ matchBy });
+    const termIndex: TermIndex = {};
+    const app = { vault: { read: async () => glossary } } as unknown as App;
+    await parseGlossaryFile(app, makeMockFile('glossary.md'), settings, termIndex);
+    return new TermMatcher(termIndex, settings).findTermsInText(text, 0).map(m => m.matched);
+  }
+
+  const TEXT = 'The CPU runs the API, an Application Programming Interface';
+
+  it('match by acronym when matchBy=term, while 3-column rows match by full term', async () => {
+    expect(await matched('term', TEXT)).toEqual(['CPU', 'Application Programming Interface']);
+  });
+
+  it('match by acronym when matchBy=acronym', async () => {
+    expect(await matched('acronym', TEXT)).toEqual(['CPU', 'API']);
   });
 });

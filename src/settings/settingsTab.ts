@@ -19,7 +19,7 @@ export class GlossarySettingTab extends PluginSettingTab {
     // --- Match by ---
     new Setting(containerEl)
       .setName('Match by')
-      .setDesc('What to highlight. 2-column tables always match by acronym.')
+      .setDesc('What to highlight from 3-column tables. 2-column tables always match by acronym.')
       .addDropdown(dd => dd
         .addOption('acronym', 'Acronym only')
         .addOption('term', 'Term only')

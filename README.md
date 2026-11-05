@@ -81,7 +81,7 @@ with no such table gets a new one at the end.
 
 | Setting | What it does |
 |---|---|
-| Match by | Highlight acronyms, full terms, or both. |
+| Match by | Highlight acronyms, full terms, or both, from 3-column tables. 2-column tables always match by acronym. |
 | Case sensitive | Match full terms with exact case. |
 | Fuzzy matching | Also match near-spellings of single-word full terms. |
 | Exclude acronyms / Exclude terms | Comma-separated entries never to highlight. |

@@ -34,9 +34,9 @@ export class TermMatcher {
   findTermsInText(text: string, lineStart: number): TermMatch[] {
     const raw: TermMatch[] = [];
 
-    if (this.settings.matchBy === 'acronym' || this.settings.matchBy === 'both') {
-      this.findAcronymMatches(text, raw, lineStart);
-    }
+    // "Match by" picks what 3-column rows match by. 2-column rows (acronym, description; no full
+    // term) always match by acronym, so "term" still looks for those.
+    this.findAcronymMatches(text, raw, lineStart, this.settings.matchBy === 'term');
     if (this.settings.matchBy === 'term' || this.settings.matchBy === 'both') {
       this.findTermMatches(text, raw, lineStart);
     }
@@ -62,8 +62,9 @@ export class TermMatcher {
     return result;
   }
 
-  private findAcronymMatches(text: string, matches: TermMatch[], lineStart: number): void {
-    for (const [key, termsList] of Object.entries(this.termIndex)) {
+  private findAcronymMatches(text: string, matches: TermMatch[], lineStart: number, twoColumnOnly: boolean): void {
+    for (const [key, allTerms] of Object.entries(this.termIndex)) {
+      const termsList = twoColumnOnly ? allTerms.filter(t => !t.fullTerm) : allTerms;
       const first = termsList[0];
       if (!first?.acronym || !isAcronymKey(key, termsList)) continue;
 
