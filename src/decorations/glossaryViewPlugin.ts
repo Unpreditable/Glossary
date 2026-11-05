@@ -2,6 +2,7 @@ import { ViewPlugin, Decoration, DecorationSet, EditorView, ViewUpdate } from "@
 import { RangeSetBuilder } from "@codemirror/state";
 import { isInCodeBlock } from '../matcher/codeBlockDetector';
 import type { TermMatcher, TermMatch } from '../matcher/termMatcher';
+import { editorInfoField } from 'obsidian';
 import type { App } from 'obsidian';
 import type { GlossarySettings } from '../settings';
 
@@ -90,8 +91,9 @@ export class GlossaryViewPlugin {
       return new RangeSetBuilder<Decoration>().finish();
     }
 
-    const activeFile = this.plugin.app.workspace.getActiveFile();
-    if (!activeFile || !this.plugin.matcher.shouldProcessFile(this.plugin.app, activeFile)) {
+    // This editor's own file: in a split, the active file belongs to whichever pane has focus.
+    const file = view.state.field(editorInfoField, false)?.file ?? null;
+    if (!file || !this.plugin.matcher.shouldProcessFile(this.plugin.app, file)) {
       this.lineCache.clear();
       return new RangeSetBuilder<Decoration>().finish();
     }

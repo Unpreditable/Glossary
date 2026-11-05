@@ -10,6 +10,7 @@ import { TermMatcher } from '../../src/matcher/termMatcher';
 import type { GlossarySettings } from '../../src/settings';
 import type { TermIndex } from '../../src/index/termIndex';
 import { makeMockApp, makeMockFile } from '../fixtures/mockApp';
+import { editorInfoField } from 'obsidian';
 
 const SETTINGS: GlossarySettings = {
   matchBy: 'both',
@@ -29,10 +30,14 @@ function fakeView(state: EditorState): EditorView {
   return { state, visibleRanges: [{ from: 0, to: state.doc.length }] } as unknown as EditorView;
 }
 
-function makePlugin(state: EditorState): GlossaryViewPlugin {
-  const app = makeMockApp();
-  const note = makeMockFile('note.md');
-  (app as unknown as { workspace: unknown }).workspace = { getActiveFile: () => note };
+/** A document open in an editor showing `path`. */
+function docIn(doc: string, path = 'note.md'): EditorState {
+  return EditorState.create({ doc, extensions: editorInfoField.init(() => ({ file: makeMockFile(path) })) });
+}
+
+function makePlugin(state: EditorState, activePath = 'note.md'): GlossaryViewPlugin {
+  const app = makeMockApp(['glossary.md']);
+  (app as unknown as { workspace: unknown }).workspace = { getActiveFile: () => makeMockFile(activePath) };
   const ref = { app, settings: SETTINGS, matcher: new TermMatcher(INDEX, SETTINGS) };
   return new GlossaryViewPlugin(fakeView(state), ref);
 }
@@ -60,21 +65,21 @@ function edit(plugin: GlossaryViewPlugin, state: EditorState, change: { from: nu
 
 describe('GlossaryViewPlugin decorations', () => {
   it('highlights terms on every visible line', () => {
-    const state = EditorState.create({ doc: 'aa API\nbb\ncc API' });
+    const state = docIn('aa API\nbb\ncc API');
     expect(highlighted(makePlugin(state), state)).toEqual(['API', 'API']);
   });
 
   // A later line moving onto the start offset another line had: the old position-keyed
   // cache gave it that line's matches.
   it('keeps highlights right after an edit shifts later lines', () => {
-    let state = EditorState.create({ doc: 'aa API\nbb\ncc API' });
+    let state = docIn('aa API\nbb\ncc API');
     const plugin = makePlugin(state);
     state = edit(plugin, state, { from: 0, to: 3 }); // "API\nbb\ncc API": line 3 now starts where line 2 did
     expect(highlighted(plugin, state)).toEqual(['API', 'API']);
   });
 
   it('keeps highlights right after two lines are joined', () => {
-    let state = EditorState.create({ doc: 'one\nAPI two\nthree API' });
+    let state = docIn('one\nAPI two\nthree API');
     const plugin = makePlugin(state);
     state = edit(plugin, state, { from: 3, to: 4 }); // "oneAPI two\nthree API"
     expect(highlighted(plugin, state)).toEqual(['API']);
@@ -82,14 +87,25 @@ describe('GlossaryViewPlugin decorations', () => {
   });
 
   it('highlights a term typed into a line', () => {
-    let state = EditorState.create({ doc: 'first\nsecond' });
+    let state = docIn('first\nsecond');
     const plugin = makePlugin(state);
     state = edit(plugin, state, { from: 6, insert: 'API ' });
     expect(highlighted(plugin, state)).toEqual(['API']);
   });
 
+  // A split: the focused pane shows another file than this editor.
+  it('highlights its own note while a glossary note has focus', () => {
+    const state = docIn('An API', 'note.md');
+    expect(highlighted(makePlugin(state, 'glossary.md'), state)).toEqual(['API']);
+  });
+
+  it('leaves a glossary note bare while another note has focus', () => {
+    const state = docIn('An API', 'glossary.md');
+    expect(highlighted(makePlugin(state, 'note.md'), state)).toEqual([]);
+  });
+
   it('does not rebuild on a cursor-only update', () => {
-    const state = EditorState.create({ doc: 'API' });
+    const state = docIn('API');
     const plugin = makePlugin(state);
     const before = plugin.decorations;
     plugin.update({ docChanged: false, viewportChanged: false } as unknown as ViewUpdate);
