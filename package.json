@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-smart-glossary",
+  "name": "obsidian-glossary",
   "version": "1.0.0",
   "description": "Highlights glossary terms in notes and shows definitions on hover",
   "main": "main.js",
@@ -27,5 +27,6 @@
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1"
-  }
+  },
+  "license": "GPL-3.0-only"
 }
