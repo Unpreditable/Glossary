@@ -53,6 +53,8 @@ export class GlossaryItemView extends ItemView {
   private sectionEls: HTMLElement[] = [];
   private searchQuery = '';
   private pendingAddRow: number | null = null;
+  /** The content this view last wrote, so its own writes aren't mistaken for outside changes. */
+  private lastWritten: string | null = null;
 
   constructor(leaf: WorkspaceLeaf, private plugin: GlossaryPlugin) {
     super(leaf);
@@ -78,7 +80,25 @@ export class GlossaryItemView extends ItemView {
 
   getState(): Record<string, unknown> { return { file: this.filePath }; }
 
-  async onOpen(): Promise<void> { /* populated via setState */ }
+  async onOpen(): Promise<void> {
+    // Content is populated via setState. Keep it in step with changes made elsewhere: the
+    // editor's "Add to glossary", a source pane, Sync. Writers pick rows by index, so a stale
+    // model would send the next cell edit to the wrong row.
+    this.registerEvent(this.app.vault.on('modify', (file) => {
+      if (file instanceof TFile && file.path === this.filePath) void this.syncFromFile(file);
+    }));
+  }
+
+  private async syncFromFile(file: TFile): Promise<void> {
+    const content = await this.app.vault.read(file);
+    if (content === this.lastWritten) return;
+    this.syncTables(content);
+  }
+
+  private async write(file: TFile, content: string): Promise<void> {
+    this.lastWritten = content;
+    await this.app.vault.modify(file, content);
+  }
 
   private async loadAndRender(): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
@@ -321,7 +341,14 @@ export class GlossaryItemView extends ItemView {
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
     if (!(file instanceof TFile)) return;
     const content = await this.app.vault.read(file);
-    await this.app.vault.modify(file, writeRowToContent(content, table, rowIdx, cells));
+    // The row must still hold what this view last showed for it; if the note changed and the
+    // view hasn't caught up, re-read instead of overwriting another term.
+    const current = parseFileTables(content)[table.tableIdx]?.rows[rowIdx];
+    if (!current || !sameCells(current.cells, table.rows[rowIdx].cells)) {
+      this.syncTables(content);
+      return;
+    }
+    await this.write(file, writeRowToContent(content, table, rowIdx, cells));
     table.rows[rowIdx].cells = cells;
   }
 
@@ -329,7 +356,7 @@ export class GlossaryItemView extends ItemView {
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
     if (!(file instanceof TFile)) return;
     const updated = insertRowAlphabeticallyInContent(await this.app.vault.read(file), table, cells);
-    await this.app.vault.modify(file, updated);
+    await this.write(file, updated);
 
     // Mirror the insert in the in-memory model: the new row sits where the parsed
     // rows first diverge from ours. Later rows shift down, so renumber them.
@@ -367,7 +394,7 @@ export class GlossaryItemView extends ItemView {
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
     if (!(file instanceof TFile)) return;
     const updated = sortTableInContent(await this.app.vault.read(file), table, sorted);
-    await this.app.vault.modify(file, updated);
+    await this.write(file, updated);
     this.tables = parseFileTables(updated);
     const sectionEl = this.sectionEls[table.tableIdx];
     const updatedTable = this.tables[table.tableIdx];
@@ -418,7 +445,7 @@ export class GlossaryItemView extends ItemView {
     const file = this.app.vault.getAbstractFileByPath(this.filePath);
     if (!(file instanceof TFile)) return;
     const updated = setColWidthsInContent(await this.app.vault.read(file), table, pct);
-    await this.app.vault.modify(file, updated);
+    await this.write(file, updated);
     this.syncTables(updated);
   }
 

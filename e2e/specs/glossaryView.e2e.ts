@@ -140,6 +140,25 @@ describe("The Glossary View", () => {
     expect(await businessTable()).toEqual(BUSINESS_AFTER_KPI_EDIT);
   });
 
+  it("follows a change made outside the view, and edits the right row after it", async () => {
+    // As "Add to glossary" in the editor menu does it: a row inserted alphabetically, through the vault.
+    await browser.executeObsidian(async ({ app, obsidian }, path) => {
+      const file = app.vault.getAbstractFileByPath(path);
+      if (!(file instanceof obsidian.TFile)) throw new Error(`no ${path}`);
+      await app.vault.process(file, (text) => text.replace(
+        "| KPI | Key Performance Indicator | A measured goal |\n",
+        "| KPI | Key Performance Indicator | A measured goal |\n| NPS | Net Promoter Score | Loyalty measure |\n",
+      ));
+    }, NOTE);
+    await browser.waitUntil(async () => (await $(cell(2, 2, 1)).getText()) === "NPS", {
+      timeoutMsg: "the view never showed the row added outside it",
+    });
+
+    await editCell(cell(2, 3, 3), "Return over cost");
+    await waitForNoteLine("| ROI | Return on Investment | Return over cost |");
+    expect(await noteLines()).toContain("| NPS | Net Promoter Score | Loyalty measure |");
+  });
+
   it("adds a row when Enter is pressed in the last row", async () => {
     await $(cell(1, 2, 2)).click();
     await browser.keys("Enter");
