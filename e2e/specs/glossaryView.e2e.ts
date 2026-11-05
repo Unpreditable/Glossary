@@ -140,6 +140,29 @@ describe("The Glossary View", () => {
     expect(await businessTable()).toEqual(BUSINESS_AFTER_KPI_EDIT);
   });
 
+  it("adds a row when Enter is pressed in the last row", async () => {
+    await $(cell(1, 2, 2)).click();
+    await browser.keys("Enter");
+    const newRow = `${SECTION}:nth-child(1) tbody tr.glossary-row-new`;
+    await $(newRow).waitForExist({ timeoutMsg: "Enter in the last row added no row" });
+    expect(await $$(`${SECTION}:nth-child(1) tbody tr`).length).toBe(3);
+    // The new row's first cell is being edited.
+    const focused = await browser.execute((row) =>
+      document.activeElement === document.querySelector(`${row} td:nth-child(1) input`), newRow);
+    expect(focused).toBe(true);
+  });
+
+  it("saves a new row and starts another when Enter is pressed in it", async () => {
+    await $(`${SECTION}:nth-child(1) .glossary-view-add-btn`).click();
+    await typeInCell("BIOS");
+    await browser.keys("Enter");
+    await waitForNoteLine("| BIOS |  |  |");
+    await browser.waitUntil(
+      async () => (await $$(`${SECTION}:nth-child(1) tbody tr.glossary-row-new`).length) === 2,
+      { timeoutMsg: "no second new row was started" },
+    );
+  });
+
   it("stores resized column widths in a comment above the table", async () => {
     await dragColumnBorder(2, 1, 40);
     await browser.waitUntil(

@@ -1,6 +1,20 @@
 # GlossaryItemView — Known Bugs (post Task 5 implementation)
 
+**Status as of 2026-11-04: all four bugs are closed.** The "Fix" sections below are the original
+proposals and are kept for history. The code that shipped differs; each bug's status line says how.
+
+| # | Bug | Status |
+|---|---|---|
+| 1 | `skipGlossaryRedirect` flag stays `true` | Resolved (flag removed) |
+| 2 | Sort-hint badge not visible on new rows | Resolved (redesigned) |
+| 3 | Column resize doesn't work | Resolved |
+| 4 | Enter in last row doesn't create a new row | Cannot reproduce |
+
 ## Bug 1: `skipGlossaryRedirect` flag stays `true` permanently
+
+**Status: Resolved (flag removed).** The flag no longer exists. A per-file
+`fileViewPreference` map in `src/main.ts` records whether each note should open as source or as
+the Glossary View, so nothing has to be reset after "View source".
 
 **Symptom:** After clicking "View source" once, the file always opens in markdown — the glossary view never opens again for that session.
 
@@ -19,6 +33,11 @@ Remove the `this.skipGlossaryRedirect = false` line from the `file-open` interce
 
 ## Bug 2: Badge (sort hint) not visible on new rows
 
+**Status: Resolved (redesigned).** The badge was dropped. New rows get a red corner mark in their
+first cell, and a hint ("New items will appear in alphabetical order on next open") appears next to
+"+ Add term" while the table has a new row. Both are plain CSS in `src/decorations/cssInjector.ts`,
+so nothing is clipped.
+
 **Symptom:** After adding a new row, no hover badge appears.
 
 **Root cause:** Badge is `position: absolute` inside a `<td>`. With `table-layout: fixed`, the table clips overflow from cells. Even with `overflow: visible` on the cell, the table element itself clips it.
@@ -33,6 +52,11 @@ Remove the `this.skipGlossaryRedirect = false` line from the `file-open` interce
 ---
 
 ## Bug 3: Column resize doesn't work
+
+**Status: Resolved.** A JS resizer (`attachColResizer` in `src/glossary/glossaryView.ts`) drags the
+`<col>` widths, close to the proposal below. Widths are saved in the note as a
+`%%glossary_column_width=…%%` line above the table, not in plugin settings. Three e2e tests in
+`e2e/specs/glossaryView.e2e.ts` cover saving, reading back, and editing after the line shifts rows.
 
 **Symptom:** Resize handles appear on `<th>` corners (CSS `resize: horizontal`) but dragging them resizes only the header cell element, not the column.
 
@@ -96,6 +120,11 @@ Also remove `resize: horizontal` from `th` CSS (it conflicts).
 ---
 
 ## Bug 4: Enter in last row doesn't create a new row
+
+**Status: Cannot reproduce.** Two e2e tests added on 2026-11-04 pass in Obsidian 1.14.4: Enter in
+the last existing row adds a new row with its first cell focused, and Enter in a filled new row
+saves it and starts another. The investigation notes below predate that check. Reopen if it shows up
+again, with the steps that trigger it.
 
 **Symptom:** Pressing Enter in the last existing row moves focus nowhere; new row is not created.
 
