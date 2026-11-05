@@ -11,6 +11,10 @@ import type { ViewRow, ViewTable } from './glossaryFileParser';
 
 export const GLOSSARY_VIEW_TYPE = 'glossary-view';
 
+function sameCells(a: string[] | undefined, b: string[]): boolean {
+  return !!a && a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
 // Renders inline markdown (links, bold, italic, code, <br>) into an element.
 function renderInline(text: string, el: HTMLElement): void {
   for (const [i, part] of text.split('<br>').entries()) {
@@ -326,26 +330,35 @@ export class GlossaryItemView extends ItemView {
     if (!(file instanceof TFile)) return;
     const updated = insertRowAlphabeticallyInContent(await this.app.vault.read(file), table, cells);
     await this.app.vault.modify(file, updated);
-    this.tables = parseFileTables(updated);
 
-    const updatedTable = this.tables[table.tableIdx];
-    const newRow = updatedTable?.rows.find(r => r.cells.join('\x00') === cells.join('\x00'));
+    // Mirror the insert in the in-memory model: the new row sits where the parsed
+    // rows first diverge from ours. Later rows shift down, so renumber them.
+    const parsedRows = parseFileTables(updated)[table.tableIdx]?.rows ?? [];
+    let k = 0;
+    while (k < table.rows.length && sameCells(parsedRows[k]?.cells, table.rows[k].cells)) k++;
+    const newRow: ViewRow = { cells, rowIdx: k, lineIdx: -1 }; // lineIdx patched by syncTables
+    table.rows.splice(k, 0, newRow);
+    table.rows.forEach((r, i) => { r.rowIdx = i; });
+
+    const inPlace = this.syncTables(updated);
 
     // Convert in-place: keep glossary-row-new for visual indicator, wire up existing-row save
-    if (newRow && updatedTable) {
+    if (inPlace) {
       for (let c = 0; c < table.colCount; c++) {
         inputs[c].addEventListener('blur', () => {
-          void this.saveExistingRow(updatedTable, newRow.rowIdx, inputs.map(i => i.value.trim()));
+          void this.saveExistingRow(table, newRow.rowIdx, inputs.map(i => i.value.trim()));
         });
       }
+      this.applySearch();
     }
-
-    this.applySearch();
 
     if (this.pendingAddRow === table.tableIdx) {
       this.pendingAddRow = null;
-      const tbody = tr.parentElement as HTMLElement | null;
-      if (tbody && updatedTable) this.addNewRow(tbody, updatedTable);
+      const tbody = inPlace
+        ? tr.parentElement as HTMLElement | null
+        : this.sectionEls[table.tableIdx]?.querySelector('tbody') ?? null;
+      const target = this.tables[table.tableIdx];
+      if (tbody && target) this.addNewRow(tbody, target);
     }
   }
 
@@ -412,27 +425,31 @@ export class GlossaryItemView extends ItemView {
   // Re-parses the file. If its content matches what the DOM shows, only line offsets
   // are patched into the existing table objects (row handlers hold references to them),
   // so the view isn't rebuilt and scroll position is kept. Otherwise re-renders.
-  private syncTables(content: string): void {
+  // Returns true if patched in place, false if it re-rendered.
+  private syncTables(content: string): boolean {
     const parsed = parseFileTables(content);
     const sameContent = parsed.length === this.tables.length && parsed.every((p, i) => {
       const t = this.tables[i];
       return p.colCount === t.colCount &&
-        p.headerCells.join('\x00') === t.headerCells.join('\x00') &&
+        sameCells(p.headerCells, t.headerCells) &&
         p.rows.length === t.rows.length &&
-        p.rows.every((r, j) => r.cells.join('\x00') === t.rows[j].cells.join('\x00'));
+        p.rows.every((r, j) => sameCells(r.cells, t.rows[j].cells));
     });
 
     if (!sameContent) {
       this.tables = parsed;
       this.render();
-      return;
+      return false;
     }
     parsed.forEach((p, i) => {
       const t = this.tables[i];
       t.headerLineIdx = p.headerLineIdx;
+      t.endLineIdx = p.endLineIdx;
+      p.rows.forEach((r, j) => { t.rows[j].lineIdx = r.lineIdx; });
       t.colWidths = p.colWidths;
       t.colWidthsLineIdx = p.colWidthsLineIdx;
     });
+    return true;
   }
 
   private applySearch(): void {
