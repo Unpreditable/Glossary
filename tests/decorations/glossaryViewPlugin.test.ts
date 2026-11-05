@@ -11,6 +11,7 @@ import type { GlossarySettings } from '../../src/settings';
 import type { TermIndex } from '../../src/index/termIndex';
 import { makeMockApp, makeMockFile } from '../fixtures/mockApp';
 import { editorInfoField } from 'obsidian';
+import type { MarkdownFileInfo } from 'obsidian';
 
 const SETTINGS: GlossarySettings = {
   matchBy: 'both',
@@ -32,7 +33,7 @@ function fakeView(state: EditorState): EditorView {
 
 /** A document open in an editor showing `path`. */
 function docIn(doc: string, path = 'note.md'): EditorState {
-  return EditorState.create({ doc, extensions: editorInfoField.init(() => ({ file: makeMockFile(path) })) });
+  return EditorState.create({ doc, extensions: editorInfoField.init(() => ({ file: makeMockFile(path) }) as unknown as MarkdownFileInfo) });
 }
 
 function makePlugin(state: EditorState, activePath = 'note.md'): GlossaryViewPlugin {
@@ -110,5 +111,18 @@ describe('GlossaryViewPlugin decorations', () => {
     const before = plugin.decorations;
     plugin.update({ docChanged: false, viewportChanged: false } as unknown as ViewUpdate);
     expect(plugin.decorations).toBe(before);
+  });
+
+  // An index rebuild makes a new matcher; workspace.updateOptions() then sends every editor an
+  // update that changes neither the document nor the viewport.
+  it('redecorates against a new matcher, dropping matches cached from the old one', () => {
+    const state = docIn('An API and a CPU');
+    const ref = { app: makeMockApp(), settings: SETTINGS, matcher: new TermMatcher(INDEX, SETTINGS) };
+    const plugin = new GlossaryViewPlugin(fakeView(state), ref);
+    expect(highlighted(plugin, state)).toEqual(['API']);
+
+    ref.matcher = new TermMatcher({ CPU: [{ sourceFile: 'glossary.md', acronym: 'CPU' }] }, SETTINGS);
+    plugin.update({ view: fakeView(state), docChanged: false, viewportChanged: false } as unknown as ViewUpdate);
+    expect(highlighted(plugin, state)).toEqual(['CPU']);
   });
 });

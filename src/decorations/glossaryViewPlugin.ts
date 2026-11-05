@@ -48,31 +48,24 @@ const MAX_CACHED_LINES = 5000;
 
 export class GlossaryViewPlugin {
   decorations: DecorationSet;
-  forceRebuild = false;
   /**
    * Matches per line, keyed by the line's text, with positions relative to the line start.
-   * A line's matches depend only on its text, so entries stay valid however lines move;
-   * forceRebuild clears it when the index or settings change.
+   * A line's matches depend only on its text, so entries stay valid however lines move.
+   * They belong to the matcher they came from: each index build makes a new one, which empties
+   * the cache (main.ts then calls workspace.updateOptions(), so every editor gets an update).
    */
   private lineCache: Map<string, TermMatch[]> = new Map();
+  private cachedFor: TermMatcher | null = null;
 
   constructor(view: EditorView, private plugin: PluginRef) {
-    if (!this.plugin?.matcher) {
-      this.decorations = new RangeSetBuilder<Decoration>().finish();
-      return;
-    }
     this.decorations = this.buildDecorations(view);
   }
 
   update(update: ViewUpdate): void {
-    if (this.forceRebuild) {
-      this.lineCache.clear();
-      this.forceRebuild = false;
-      this.decorations = this.buildDecorations(update.view);
-    } else if (update.docChanged || update.viewportChanged) {
+    // Cursor-only updates with the same matcher change nothing.
+    if (update.docChanged || update.viewportChanged || this.plugin.matcher !== this.cachedFor) {
       this.decorations = this.buildDecorations(update.view);
     }
-    // cursor-only (no docChanged, no viewportChanged): no-op
   }
 
   /** The line's matches relative to its start, from the cache or freshly computed. */
@@ -89,6 +82,10 @@ export class GlossaryViewPlugin {
   private buildDecorations(view: EditorView): DecorationSet {
     if (!this.plugin?.matcher) {
       return new RangeSetBuilder<Decoration>().finish();
+    }
+    if (this.plugin.matcher !== this.cachedFor) {
+      this.lineCache.clear();
+      this.cachedFor = this.plugin.matcher;
     }
 
     // This editor's own file: in a split, the active file belongs to whichever pane has focus.

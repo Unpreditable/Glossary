@@ -1,5 +1,4 @@
 import { Plugin, TFile, TAbstractFile, debounce, Debouncer, MarkdownView, Notice, WorkspaceLeaf } from "obsidian";
-import type { EditorView } from "@codemirror/view";
 import { GlossarySettings, DEFAULT_SETTINGS } from "./settings";
 import { buildTermIndex } from "./index/tableParser";
 import { isGlossaryFile } from "./index/glossaryDetector";
@@ -22,7 +21,6 @@ export default class GlossaryPlugin extends Plugin {
   private recentlyHandled = new Set<string>();
   private debouncedRebuild!: Debouncer<[], void>;
   matcher!: TermMatcher;
-  private viewPluginSpec!: ReturnType<typeof createGlossaryViewPlugin>;
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -30,10 +28,10 @@ export default class GlossaryPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on('window-open', (win) => applyHighlightStyle(win.doc.body, this.settings)),
     );
-    this.viewPluginSpec = createGlossaryViewPlugin(this);
+    const viewPluginSpec = createGlossaryViewPlugin(this);
     this.registerEditorExtension([
-      this.viewPluginSpec,
-      createTooltipExtension(this.viewPluginSpec),
+      viewPluginSpec,
+      createTooltipExtension(viewPluginSpec),
     ]);
 
     this.debouncedRebuild = debounce(
@@ -207,20 +205,12 @@ export default class GlossaryPlugin extends Plugin {
     return bodies;
   }
 
-  /** Drops every open editor's cached matches and redecorates it against the current matcher. */
+  /**
+   * Has every open editor re-run its extensions. The view plugin sees the new matcher, drops the
+   * matches it cached from the old one, and redecorates.
+   */
   private refreshEditors(): void {
-    this.app.workspace.iterateAllLeaves((leaf) => {
-      if (leaf.view instanceof MarkdownView) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        const editorView = (leaf.view.editor as any).cm as EditorView;
-        if (!editorView) return;
-        const p = editorView.plugin(this.viewPluginSpec);
-        if (p) {
-          p.forceRebuild = true;
-          editorView.dispatch({});
-        }
-      }
-    });
+    this.app.workspace.updateOptions();
   }
 
   async loadSettings(): Promise<void> {
