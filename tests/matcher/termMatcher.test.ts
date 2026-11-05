@@ -1,4 +1,4 @@
-import { TermMatcher, TermMatch } from '../../src/matcher/termMatcher';
+import { TermMatcher } from '../../src/matcher/termMatcher';
 import type { TermIndex } from '../../src/index/termIndex';
 import type { GlossarySettings } from '../../src/settings';
 import { makeMockApp, makeMockFile } from '../fixtures/mockApp';

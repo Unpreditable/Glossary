@@ -8,11 +8,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Development (watch mode, inline sourcemaps)
 npm run dev
 
-# Production build (type-check + bundle, no sourcemaps)
+# Production build (type-check + lint + bundle, no sourcemaps)
 npm run build
 
-# Type-check only
+# Type-check only (src and tests)
 npx tsc -noEmit -skipLibCheck
+
+# Lint: Obsidian's review rules over every .ts file and manifest.json
+npm run lint
 
 # Unit tests (Jest, pure logic, in tests/)
 npm test

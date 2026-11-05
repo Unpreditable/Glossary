@@ -5,10 +5,11 @@
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "build": "tsc -noEmit -skipLibCheck && npm run lint && node esbuild.config.mjs production",
     "test": "jest --no-coverage",
     "test:e2e": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-e2e.mjs",
-    "test:all": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-test-all.mjs"
+    "test:all": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-test-all.mjs",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@codemirror/language": "^6.12.2",
