@@ -15,6 +15,8 @@ import { GlossaryItemView, GLOSSARY_VIEW_TYPE } from "./glossary/glossaryView";
 export default class GlossaryPlugin extends Plugin {
   settings!: GlossarySettings;
   termIndex: TermIndex = {};
+  /** Paths of the glossary files the current index was built from. */
+  private indexedFiles = new Set<string>();
   fileViewPreference: Map<string, 'glossary' | 'markdown'> = new Map();
   private recentlyHandled = new Set<string>();
   private debouncedRebuild!: Debouncer<[], void>;
@@ -37,11 +39,24 @@ export default class GlossaryPlugin extends Plugin {
       true
     );
 
+    // 'changed' fires once the metadata cache has re-read a file, so it sees a glossary tag
+    // being added as well as content edits. A file the index was built from still counts after
+    // its tag is removed, so its terms are dropped.
     this.registerEvent(
-      this.app.vault.on("modify", (file: TAbstractFile) => {
-        if (file instanceof TFile && isGlossaryFile(this.app, file)) {
+      this.app.metadataCache.on("changed", (file: TFile) => {
+        if (this.indexedFiles.has(file.path) || isGlossaryFile(this.app, file)) {
           this.debouncedRebuild();
         }
+      })
+    );
+    this.registerEvent(
+      this.app.vault.on("delete", (file: TAbstractFile) => {
+        if (this.indexedFiles.has(file.path)) void this.buildGlossaryIndex({ silent: true });
+      })
+    );
+    this.registerEvent(
+      this.app.vault.on("rename", (_file: TAbstractFile, oldPath: string) => {
+        if (this.indexedFiles.has(oldPath)) void this.buildGlossaryIndex({ silent: true });
       })
     );
 
@@ -210,6 +225,7 @@ export default class GlossaryPlugin extends Plugin {
     let termCount = 0;
     const glossaryFiles = this.app.vault.getMarkdownFiles()
       .filter((file) => isGlossaryFile(this.app, file));
+    this.indexedFiles = new Set(glossaryFiles.map((file) => file.path));
     for (const file of glossaryFiles) {
       termCount += await parseGlossaryFile(this.app, file, this.settings, this.termIndex);
     }
