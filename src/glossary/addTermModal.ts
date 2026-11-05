@@ -2,6 +2,7 @@ import { App, Modal, Setting, TFile } from 'obsidian';
 import type GlossaryPlugin from '../main';
 import { isGlossaryFile } from '../index/glossaryDetector';
 import type { GlossaryTerm } from '../index/termIndex';
+import { addTermToContent } from './glossaryFileParser';
 
 export class AddTermModal extends Modal {
   private acronym = '';
@@ -206,8 +207,8 @@ export class AddTermModal extends Modal {
   private async submit(): Promise<void> {
     if (this.filledCount() < 2 || !this.targetFile) return;
 
-    const row = this.buildRow();
-    await this.appendToGlossaryFile(this.targetFile, row);
+    const cells = this.buildCells();
+    await this.app.vault.process(this.targetFile, (content) => addTermToContent(content, cells));
     await this.plugin.buildGlossaryIndex({ silent: true });
 
     const { contentEl } = this;
@@ -219,59 +220,11 @@ export class AddTermModal extends Modal {
     setTimeout(() => this.close(), 1000);
   }
 
-  private buildRow(): string {
-    const esc = (s: string) => s.replace(/\|/g, '\\|');
-    if (this.fullTerm) {
-      return `| ${esc(this.acronym)} | ${esc(this.fullTerm)} | ${esc(this.description)} |`;
-    }
-    return `| ${esc(this.acronym)} | ${esc(this.description)} |`;
-  }
-
-  private async appendToGlossaryFile(file: TFile, row: string): Promise<void> {
-    const content = await this.app.vault.read(file);
-    const lines = content.split('\n');
-
-    const isRow = (line: string) => { const t = line.trim(); return t.startsWith('|') && t.endsWith('|'); };
-    const isSep = (line: string) => {
-      const t = line.trim();
-      if (!t.startsWith('|') || !t.endsWith('|')) return false;
-      return t.slice(1, -1).split('|').every(c => /^[\s\-:]+$/.test(c));
-    };
-    const countCols = (line: string) => line.trim().split('|').length - 2;
-    const targetCols = this.fullTerm ? 3 : 2;
-    const newKey = (this.acronym || this.fullTerm).toLowerCase();
-
-    let insertIdx = -1;
-
-    for (let i = 0; i < lines.length - 1; i++) {
-      if (!isRow(lines[i]) || !isSep(lines[i + 1])) continue;
-      if (countCols(lines[i]) !== targetCols) continue;
-
-      // Found the right table — scan past its data rows
-      let j = i + 2;
-      while (j < lines.length && isRow(lines[j])) j++;
-
-      // Find alphabetical insertion point within data rows
-      insertIdx = j;
-      for (let k = i + 2; k < j; k++) {
-        const firstCol = (lines[k].trim().split('|')[1] ?? '').trim().toLowerCase();
-        if (firstCol > newKey) { insertIdx = k; break; }
-      }
-      break;
-    }
-
-    if (insertIdx >= 0) {
-      lines.splice(insertIdx, 0, row);
-    } else {
-      const isThreeCol = !!this.fullTerm;
-      const header = isThreeCol
-        ? '| Acronym | Full Term | Description |'
-        : '| Acronym | Description |';
-      const sep = isThreeCol ? '| --- | --- | --- |' : '| --- | --- |';
-      lines.push('', header, sep, row);
-    }
-
-    await this.app.vault.modify(file, lines.join('\n'));
+  /** The row's cells: three columns with a full term, two (acronym, description) without. */
+  private buildCells(): string[] {
+    return this.fullTerm
+      ? [this.acronym, this.fullTerm, this.description]
+      : [this.acronym, this.description];
   }
 
   onClose(): void {

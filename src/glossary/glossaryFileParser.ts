@@ -85,6 +85,15 @@ export function parseFileTables(content: string): ViewTable[] {
   return tables;
 }
 
+/**
+ * A note's lines without their line endings, and the ending to join them back with. A note
+ * saved with Windows endings keeps them: joining with '\n' would leave every line a writer
+ * touched or added with a different ending from the rest.
+ */
+export function splitLines(content: string): { lines: string[]; eol: string } {
+  return { lines: content.split(/\r?\n/), eol: content.includes('\r\n') ? '\r\n' : '\n' };
+}
+
 function buildRowLine(cells: string[]): string {
   return '| ' + cells.map(c => c.replace(/\|/g, '\\|')).join(' | ') + ' |';
 }
@@ -102,11 +111,11 @@ export function writeRowToContent(
   rowIdx: number,
   cells: string[],
 ): string {
-  const lines = content.split('\n');
+  const { lines, eol } = splitLines(content);
   const row = freshTable(lines, table)?.rows[rowIdx];
   if (!row) return content;
   lines[row.lineIdx] = buildRowLine(cells);
-  return lines.join('\n');
+  return lines.join(eol);
 }
 
 export function insertRowAlphabeticallyInContent(
@@ -114,13 +123,13 @@ export function insertRowAlphabeticallyInContent(
   table: ViewTable,
   cells: string[],
 ): string {
-  const lines = content.split('\n');
+  const { lines, eol } = splitLines(content);
   const fresh = freshTable(lines, table);
   if (!fresh) return content;
   const newKey = (cells[0] ?? '').toLowerCase();
   const before = fresh.rows.find(r => (r.cells[0] ?? '').toLowerCase() > newKey);
   lines.splice(before ? before.lineIdx : fresh.endLineIdx, 0, buildRowLine(cells));
-  return lines.join('\n');
+  return lines.join(eol);
 }
 
 export function setColWidthsInContent(
@@ -128,7 +137,7 @@ export function setColWidthsInContent(
   table: ViewTable,
   widths: number[],
 ): string {
-  const lines = content.split('\n');
+  const { lines, eol } = splitLines(content);
   const fresh = freshTable(lines, table);
   if (!fresh) return content;
   const line = `%%glossary_column_width=${widths.join('|')}%%`;
@@ -137,5 +146,19 @@ export function setColWidthsInContent(
   } else {
     lines.splice(fresh.headerLineIdx, 0, line);
   }
-  return lines.join('\n');
+  return lines.join(eol);
+}
+
+/**
+ * Adds a term as the add-term modal does: into the first table with as many columns as `cells`,
+ * in alphabetical order, or as a new table at the end of the note when there is none.
+ */
+export function addTermToContent(content: string, cells: string[]): string {
+  const table = parseFileTables(content).find(t => t.colCount === cells.length);
+  if (table) return insertRowAlphabeticallyInContent(content, table, cells);
+
+  const { lines, eol } = splitLines(content);
+  const header = cells.length === 3 ? ['Acronym', 'Full Term', 'Description'] : ['Acronym', 'Description'];
+  lines.push('', buildRowLine(header), '| ' + header.map(() => '---').join(' | ') + ' |', buildRowLine(cells));
+  return lines.join(eol);
 }

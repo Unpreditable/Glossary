@@ -1,0 +1,2 @@
+# The e2e fixture notes are read and edited by tests; keep them byte-for-byte the same on every OS.
+e2e/vault/** text eol=lf

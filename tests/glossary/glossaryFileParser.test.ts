@@ -3,6 +3,7 @@ import {
   writeRowToContent,
   insertRowAlphabeticallyInContent,
   setColWidthsInContent,
+  addTermToContent,
 } from '../../src/glossary/glossaryFileParser';
 
 // The second table has an all-empty row in the middle: parsing skips it, so a row's
@@ -88,5 +89,53 @@ describe('writers with a stale table', () => {
     expect(writeRowToContent(oneTable, business, 0, ['X', 'Y'])).toBe(oneTable);
     expect(insertRowAlphabeticallyInContent(oneTable, business, ['X', 'Y'])).toBe(oneTable);
     expect(setColWidthsInContent(oneTable, business, [50, 50])).toBe(oneTable);
+  });
+});
+
+describe('writers on a note with Windows line endings', () => {
+  const crlf = CONTENT.split('\n').join('\r\n');
+  const business = parseFileTables(crlf)[1];
+  // Every line break in the result is \r\n: none left bare by an edited or added line.
+  const allCrlf = (s: string) => !/[^\r]\n/.test(s) && s.includes('\r\n');
+
+  it('writeRowToContent keeps them', () => {
+    const out = writeRowToContent(crlf, business, 0, ['KPI', 'Edited']);
+    expect(allCrlf(out)).toBe(true);
+    expect(out.split('\r\n')[10]).toBe('| KPI | Edited |');
+  });
+
+  it('insertRowAlphabeticallyInContent keeps them', () => {
+    expect(allCrlf(insertRowAlphabeticallyInContent(crlf, business, ['NPS', 'Net promoter']))).toBe(true);
+    expect(allCrlf(insertRowAlphabeticallyInContent(crlf, business, ['ZZZ', 'Last']))).toBe(true);
+  });
+
+  it('setColWidthsInContent keeps them', () => {
+    expect(allCrlf(setColWidthsInContent(crlf, business, [30, 70]))).toBe(true);
+  });
+
+  it('addTermToContent keeps them, also when it adds a table', () => {
+    expect(allCrlf(addTermToContent(crlf, ['NPS', 'Net promoter']))).toBe(true);
+    expect(allCrlf(addTermToContent(crlf, ['NPS', 'Net Promoter Score', 'Loyalty']))).toBe(true);
+  });
+});
+
+describe('addTermToContent', () => {
+  it('inserts into the first table with as many columns, alphabetically', () => {
+    const out = lines(addTermToContent(CONTENT, ['BIOS', 'Firmware']));
+    expect(out.slice(4, 6)).toEqual(['| API | A contract |', '| BIOS | Firmware |']);
+  });
+
+  it('adds a table at the end when no table has as many columns', () => {
+    const out = lines(addTermToContent(CONTENT, ['NPS', 'Net Promoter Score', 'Loyalty']));
+    expect(out.slice(-3)).toEqual([
+      '| Acronym | Full Term | Description |',
+      '| --- | --- | --- |',
+      '| NPS | Net Promoter Score | Loyalty |',
+    ]);
+  });
+
+  it('escapes a pipe in a cell', () => {
+    const out = addTermToContent(CONTENT, ['OR', 'a | b']);
+    expect(lines(out)).toContain('| OR | a \\| b |');
   });
 });
