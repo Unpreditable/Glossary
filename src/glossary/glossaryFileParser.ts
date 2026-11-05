@@ -34,10 +34,12 @@ function findColWidths(lines: string[], headerLineIdx: number, colCount: number)
 
 function parseCells(line: string): string[] {
   const t = line.trim();
+  // `\|` is a pipe inside a cell: park it as NUL (which a note never contains) while splitting.
+  // Not a lookbehind split: iOS before 16.4 can't parse one, and the plugin would fail to load.
   return t.slice(1, t.endsWith('|') ? -1 : undefined)
-    // Split on unescaped pipes only; `\|` is a pipe inside a cell.
-    .split(/(?<!\\)\|/)
-    .map(c => c.trim().replace(/\\\|/g, '|'));
+    .replace(/\\\|/g, '\u0000')
+    .split('|')
+    .map(c => c.trim().split('\u0000').join('|'));
 }
 
 function isSep(line: string): boolean {
