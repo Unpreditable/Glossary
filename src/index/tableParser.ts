@@ -1,6 +1,7 @@
 import { App, TFile } from "obsidian";
 import { GlossarySettings } from "../settings";
 import { GlossaryTerm, TermIndex } from "./termIndex";
+import { parseFileTables } from "../glossary/glossaryFileParser";
 
 export function addToIndex(key: string, term: GlossaryTerm, termIndex: TermIndex): void {
   if (!termIndex[key]) {
@@ -28,16 +29,12 @@ export async function parseGlossaryFile(
   termIndex: TermIndex
 ): Promise<number> {
   const content = await app.vault.read(file);
-  const lines = content.split("\n");
   let count = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line.startsWith("|") || !line.endsWith("|")) continue;
-    if (line.match(/^\|[\s\-|]+\|$/)) continue;
-    if (i + 1 < lines.length && lines[i + 1].trim().match(/^\|[\s\-|]+\|$/)) continue;
-    const columns = line.split("|").map((col) => col.trim()).slice(1, -1);
-    if (columns.length !== 3 && columns.length !== 2) continue;
-    if (columns.every((col) => !col)) continue;
+  // The Glossary View's parser: it unescapes `\|` in cells and skips header, separator and empty rows.
+  const rows = parseFileTables(content)
+    .filter((table) => table.colCount === 2 || table.colCount === 3)
+    .flatMap((table) => table.rows);
+  for (const { cells: columns } of rows) {
     const term: GlossaryTerm = { sourceFile: file.path };
     let added = false;
     if (columns.length === 3) {

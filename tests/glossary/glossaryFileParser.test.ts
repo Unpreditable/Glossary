@@ -35,6 +35,17 @@ describe('parseFileTables', () => {
     ]);
     expect(business.endLineIdx).toBe(13);
   });
+
+  it('reads an escaped pipe as part of its cell', () => {
+    const [table] = parseFileTables('| A | B |\n|---|---|\n| OR | a \\| b |');
+    expect(table.rows[0].cells).toEqual(['OR', 'a | b']);
+  });
+
+  it('reads back a cell with a pipe exactly as it was written', () => {
+    const content = '| A | B |\n|---|---|\n| X | old |';
+    const written = writeRowToContent(content, parseFileTables(content)[0], 0, ['X', 'a | b']);
+    expect(parseFileTables(written)[0].rows[0].cells).toEqual(['X', 'a | b']);
+  });
 });
 
 describe('writers on a table with an empty row', () => {

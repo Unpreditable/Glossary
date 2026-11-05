@@ -35,7 +35,8 @@ function findColWidths(lines: string[], headerLineIdx: number, colCount: number)
 function parseCells(line: string): string[] {
   const t = line.trim();
   return t.slice(1, t.endsWith('|') ? -1 : undefined)
-    .split('|')
+    // Split on unescaped pipes only; `\|` is a pipe inside a cell.
+    .split(/(?<!\\)\|/)
     .map(c => c.trim().replace(/\\\|/g, '|'));
 }
 
