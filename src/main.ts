@@ -6,7 +6,7 @@ import { isGlossaryFile } from "./index/glossaryDetector";
 import type { TermIndex } from "./index/termIndex";
 import { TermMatcher } from "./matcher/termMatcher";
 import { createGlossaryViewPlugin } from "./decorations/glossaryViewPlugin";
-import { injectGlossaryStyles, removeGlossaryStyles } from "./decorations/cssInjector";
+import { applyHighlightStyle, removeHighlightStyle } from "./decorations/cssInjector";
 import { createTooltipExtension } from "./decorations/tooltipExtension";
 import { GlossarySettingTab } from "./settings/settingsTab";
 import { AddTermModal } from "./glossary/addTermModal";
@@ -26,7 +26,10 @@ export default class GlossaryPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.loadSettings();
-    injectGlossaryStyles(this.settings);
+    this.refreshStyles();
+    this.registerEvent(
+      this.app.workspace.on('window-open', (win) => applyHighlightStyle(win.doc.body, this.settings)),
+    );
     this.viewPluginSpec = createGlossaryViewPlugin(this);
     this.registerEditorExtension([
       this.viewPluginSpec,
@@ -135,7 +138,7 @@ export default class GlossaryPlugin extends Plugin {
 
   onunload(): void {
     // Don't detach glossary leaves: Obsidian restores them when the view is re-registered on reload.
-    removeGlossaryStyles();
+    for (const body of this.windowBodies()) removeHighlightStyle(body);
   }
 
   // Restored leaves on cold start don't reliably fire active-leaf-change/file-open
@@ -192,8 +195,16 @@ export default class GlossaryPlugin extends Plugin {
     sourceViewEl.insertBefore(prompt, cmEditor);
   }
 
+  /** Applies the highlight style setting in every window; styles.css holds the rules. */
   refreshStyles(): void {
-    injectGlossaryStyles(this.settings);
+    for (const body of this.windowBodies()) applyHighlightStyle(body, this.settings);
+  }
+
+  /** The <body> of the main window and of every popout window with a leaf in it. */
+  private windowBodies(): Set<HTMLElement> {
+    const bodies = new Set<HTMLElement>([document.body]);
+    this.app.workspace.iterateAllLeaves((leaf) => { bodies.add(leaf.view.containerEl.doc.body); });
+    return bodies;
   }
 
   /** Drops every open editor's cached matches and redecorates it against the current matcher. */

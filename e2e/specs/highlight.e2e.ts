@@ -11,6 +11,20 @@ describe("Highlighting in the editor", () => {
     expect(await mark.getText()).toBe("API");
   });
 
+  it("draws the highlight in the chosen style from styles.css", async () => {
+    await obsidianPage.openFile("Notes.md");
+    await $(".cm-glossary-highlight").waitForExist({ timeoutMsg: "no term in Notes.md was highlighted" });
+    const style = await browser.execute(() => {
+      const mark = document.querySelector(".cm-glossary-highlight");
+      if (!mark) throw new Error("no highlight");
+      const css = getComputedStyle(mark);
+      return { bodyClass: document.body.classList.contains("glossary-style-gradient1"), background: css.backgroundImage };
+    });
+    // The default style is the first gradient.
+    expect(style.bodyClass).toBe(true);
+    expect(style.background).toContain("linear-gradient");
+  });
+
   it("highlights a term added to the glossary in a note that is already open", async () => {
     await obsidianPage.openFile("Notes.md");
     await $(".cm-glossary-highlight").waitForExist({ timeoutMsg: "Notes.md was never highlighted" });
