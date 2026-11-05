@@ -179,6 +179,10 @@ export default class GlossaryPlugin extends Plugin {
 
   refreshStyles(): void {
     injectGlossaryStyles(this.settings);
+  }
+
+  /** Drops every open editor's cached matches and redecorates it against the current matcher. */
+  private refreshEditors(): void {
     this.app.workspace.iterateAllLeaves((leaf) => {
       if (leaf.view instanceof MarkdownView) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -211,6 +215,8 @@ export default class GlossaryPlugin extends Plugin {
     }
     console.log(`Glossary index built: ${termCount} terms from ${glossaryFiles.length} file(s)`);
     this.matcher = new TermMatcher(this.termIndex, this.settings);
+    // Open editors cache matches from the previous matcher (or none, on startup).
+    this.refreshEditors();
     if (!options.silent) {
       new Notice(`Rebuilt ${termCount} terms from ${glossaryFiles.length} files`);
     }

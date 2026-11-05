@@ -163,6 +163,7 @@ export class GlossarySettingTab extends PluginSettingTab {
   private async save(): Promise<void> {
     await this.plugin.saveSettings();
     this.plugin.refreshStyles();
+    // Rebuilds the index against the new settings and redecorates the open editors.
     await this.plugin.buildGlossaryIndex({ silent: true });
   }
 }

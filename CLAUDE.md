@@ -44,7 +44,7 @@ Index is rebuilt on `onload` and debounced (5 s) on every glossary file `modify`
 - `glossaryViewPlugin.ts` — CodeMirror 6 `ViewPlugin`; uses a per-line cache keyed by `line.from`; on `docChanged` evicts only dirty lines; on `viewportChanged` or `forceRebuild` rebuilds visible ranges + 4000-byte lookahead; fenced block exclusion is text-based (regex on `` ``` `` lines) rather than Lezer, as a reliable supplement; marks matches with `cm-glossary-highlight` class + `data-terms` JSON attribute
 - `cssInjector.ts` — injects/replaces a `<style id="glossary-plugin-styles">` element; gradient styles use `background-clip: text` + `border-image` trick; solid style uses `text-decoration underline`
 
-**Style refresh flow**: settings change → `main.refreshStyles()` → `injectGlossaryStyles()` + iterates all `MarkdownView` leaves, sets `plugin.forceRebuild = true`, dispatches an empty transaction to trigger `update()`.
+**Refresh flow**: settings change → `main.refreshStyles()` (re-injects the CSS) → `buildGlossaryIndex()`. Every index build ends with `refreshEditors()`, which iterates all `MarkdownView` leaves, sets `plugin.forceRebuild = true`, and dispatches an empty transaction to trigger `update()`, so open notes never keep matches from an older index.
 
 **Circular dependency guard**: `glossaryViewPlugin.ts` uses a local `PluginRef` interface instead of importing `GlossaryPlugin` from `main.ts` to avoid a circular import.
 
