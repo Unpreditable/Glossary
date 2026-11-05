@@ -64,7 +64,7 @@ export default class GlossaryPlugin extends Plugin {
     );
 
     this.addCommand({
-      id: "refresh-glossary",
+      id: "refresh-index",
       name: "Refresh glossary index",
       callback: () => { void this.buildGlossaryIndex(); },
     });
