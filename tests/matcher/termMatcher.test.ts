@@ -300,6 +300,13 @@ describe('rows with both an acronym and a full term', () => {
     expect(matched(m, 'An API is an Application Programming Interface')).toEqual(['API']);
   });
 
+  it('highlights an acronym\'s plural with the same definition', async () => {
+    const m = await matcherFor({ matchBy: 'acronym' });
+    const hits = m.findTermsInText('Two APIs and one API', 0);
+    expect(hits.map(h => h.matched)).toEqual(['APIs', 'API']);
+    expect(hits[0].terms[0].description).toBe('A contract');
+  });
+
   it('the acronym wins a tie with a full term from a row that has an acronym', async () => {
     const m = await matcherFor({ matchBy: 'both' });
     const [hit] = m.findTermsInText('API Gateway', 0);

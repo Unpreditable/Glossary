@@ -67,7 +67,8 @@ export class TermMatcher {
       const first = termsList[0];
       if (!first?.acronym || !isAcronymKey(key, termsList)) continue;
 
-      const pattern = `\\b${this.escapeRegex(first.acronym)}\\b`;
+      // The key, not the acronym: the plural key ("APIs") must match its own text.
+      const pattern = `\\b${this.escapeRegex(key)}\\b`;
       // Acronyms are ALWAYS case-sensitive
       const regex = new RegExp(pattern, 'g');
       let match: RegExpExecArray | null;
