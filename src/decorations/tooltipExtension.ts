@@ -6,9 +6,9 @@ import type { GlossaryTerm } from '../index/termIndex';
 type ViewPluginSpec = ReturnType<typeof createGlossaryViewPlugin>;
 
 /** The tooltip body: the first definition, a count of the others, and where it comes from. */
-function renderTooltip(terms: GlossaryTerm[]): HTMLElement {
+function renderTooltip(doc: Document, terms: GlossaryTerm[]): HTMLElement {
   const term = terms[0];
-  const dom = document.createElement('div');
+  const dom = doc.createElement('div');
   dom.className = 'cm-tooltip-glossary';
 
   // Each part is one line; createEl sets text, so nothing from the glossary is parsed as HTML.
@@ -48,7 +48,8 @@ export function createTooltipExtension(viewPluginSpec: ViewPluginSpec): Extensio
         pos: from,
         end: to,
         above: true,
-        create: () => ({ dom: renderTooltip(terms) }),
+        // The editor's own document, which is a popout window's when the note is in one.
+        create: (editor) => ({ dom: renderTooltip(editor.dom.doc, terms) }),
       };
     });
 

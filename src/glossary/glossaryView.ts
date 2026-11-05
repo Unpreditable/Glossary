@@ -260,7 +260,7 @@ export class GlossaryItemView extends ItemView {
     }
 
     const trySave = () => {
-      if (saved || tr.contains(document.activeElement)) return;
+      if (saved || tr.contains(tr.doc.activeElement)) return;
       const cells = inputs.map(i => i.value.trim());
       if (cells.some(v => v.length > 0)) {
         saved = true;
@@ -433,13 +433,15 @@ export class GlossaryItemView extends ItemView {
           cols[i].style.width = newLeft + 'px';
           cols[i + 1].style.width = (total - newLeft) + 'px';
         };
+        // The handle's own document: in a popout window, mouse events go to that window's.
+        const doc = handle.doc;
         const onUp = () => {
-          document.removeEventListener('mousemove', onMove);
-          document.removeEventListener('mouseup', onUp);
+          doc.removeEventListener('mousemove', onMove);
+          doc.removeEventListener('mouseup', onUp);
           void this.saveColWidths(table, ths);
         };
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
+        doc.addEventListener('mousemove', onMove);
+        doc.addEventListener('mouseup', onUp);
       });
     }
   }

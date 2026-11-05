@@ -176,20 +176,17 @@ export default class GlossaryPlugin extends Plugin {
   }
 
   injectGlossaryPrompt(leaf: WorkspaceLeaf, filePath: string): void {
-    const sourceViewEl = leaf.view.containerEl.querySelector('.markdown-source-view');
+    const sourceViewEl = leaf.view.containerEl.querySelector<HTMLElement>('.markdown-source-view');
     const cmEditor = sourceViewEl?.querySelector('.cm-editor');
     if (!sourceViewEl || !cmEditor) return;
     sourceViewEl.querySelector('.glossary-source-prompt')?.remove();
-    const prompt = document.createElement('div');
-    prompt.className = 'glossary-source-prompt';
-    const btn = document.createElement('button');
-    btn.textContent = 'Open as glossary view';
-    btn.className = 'glossary-view-source-btn';
+    // createDiv/createEl build in the view's own document, so this works in popout windows too.
+    const prompt = sourceViewEl.createDiv({ cls: 'glossary-source-prompt' });
+    const btn = prompt.createEl('button', { text: 'Open as glossary view', cls: 'glossary-view-source-btn' });
     btn.addEventListener('click', () => {
       this.fileViewPreference.set(filePath, 'glossary');
       void leaf.setViewState({ type: GLOSSARY_VIEW_TYPE, state: { file: filePath }, active: true });
     });
-    prompt.appendChild(btn);
     sourceViewEl.insertBefore(prompt, cmEditor);
   }
 
