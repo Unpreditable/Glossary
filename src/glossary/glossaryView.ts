@@ -193,7 +193,7 @@ export class GlossaryItemView extends ItemView {
     for (const row of table.rows) this.renderExistingRow(tbody, table, row);
 
     const addArea = section.createDiv({ cls: 'glossary-view-add-area' });
-    addArea.createEl('button', { text: '+ Add term', cls: 'glossary-view-add-btn' })
+    addArea.createEl('button', { text: 'Add term', cls: 'glossary-view-add-btn' })
       .addEventListener('click', () => this.addNewRow(tbody, table));
     addArea.createEl('span', { text: 'New items will appear in alphabetical order on next open', cls: 'glossary-view-add-hint' });
   }

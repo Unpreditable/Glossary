@@ -185,7 +185,7 @@ export default class GlossaryPlugin extends Plugin {
     const prompt = document.createElement('div');
     prompt.className = 'glossary-source-prompt';
     const btn = document.createElement('button');
-    btn.textContent = 'Open as Glossary View';
+    btn.textContent = 'Open as glossary view';
     btn.className = 'glossary-view-source-btn';
     btn.addEventListener('click', () => {
       this.fileViewPreference.set(filePath, 'glossary');

@@ -54,12 +54,12 @@ A glossary note opens as tables instead of Markdown.
 
 - Click a cell to edit it. **Tab** and the arrow keys move between cells, and **Enter** moves to the
   next row. Changes are saved to the note when you leave the cell.
-- **+ Add term** adds a row. New terms are written to the note in alphabetical order and appear
+- **Add term** adds a row. New terms are written to the note in alphabetical order and appear
   there in the view the next time you open it.
 - Drag a column border to resize. The widths are saved in the note, as a
   `%%glossary_column_width=…%%` comment above the table.
 - **Search terms** filters the rows.
-- **View source** switches the tab to the Markdown editor. **Open as Glossary View** above the
+- **View source** switches the tab to the Markdown editor. **Open as glossary view** above the
   editor switches back.
 
 ---

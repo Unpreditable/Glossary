@@ -38,7 +38,7 @@ export class AddTermModal extends Modal {
 
     if (glossaryFiles.length === 0) {
       contentEl.createEl('p', {
-        text: 'No glossary files found. Create a markdown file with tag: glossary in its frontmatter.',
+        text: "No glossary notes found. Add glossary to the tags in a note's frontmatter to make it one.",
       });
       new Setting(contentEl).addButton(btn => btn
         .setButtonText('Cancel')

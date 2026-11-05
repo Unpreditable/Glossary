@@ -23,7 +23,7 @@ export class GlossarySettingTab extends PluginSettingTab {
       .addDropdown(dd => dd
         .addOption('acronym', 'Acronym only')
         .addOption('term', 'Term only')
-        .addOption('both', 'Acronym and Term')
+        .addOption('both', 'Acronym and term')
         .setValue(this.plugin.settings.matchBy)
         .onChange(async (value) => {
           this.plugin.settings.matchBy = value as MatchBy;
@@ -77,7 +77,7 @@ export class GlossarySettingTab extends PluginSettingTab {
         .setName('Exclude terms')
         .setDesc('Comma-separated list of full terms to never highlight.')
         .addText(t => t
-          .setPlaceholder('data, system, process')
+          .setPlaceholder('Data, system, process')
           .setValue(this.plugin.settings.excludeTerms.join(', '))
           .inputEl.addEventListener('blur', () => {
             this.plugin.settings.excludeTerms = parseList(t.getValue());
@@ -91,17 +91,17 @@ export class GlossarySettingTab extends PluginSettingTab {
       .setName('Highlight style')
       .setDesc('Visual style for highlighted glossary terms.')
       .addDropdown(dd => dd
-        .addOption('gradient1',  'Ocean Waves')
-        .addOption('gradient2',  'Sunset Glow')
-        .addOption('gradient3',  'Purple Haze')
-        .addOption('gradient4',  'Peach Melba')
-        .addOption('gradient5',  'Mint Fresh')
-        .addOption('gradient6',  'Cotton Candy')
-        .addOption('gradient7',  'Electric Dreams')
-        .addOption('gradient8',  'Spring Meadow')
-        .addOption('gradient9',  'Cloud Nine')
-        .addOption('gradient10', 'Forest Breeze')
-        .addOption('solid',      'Solid Color')
+        .addOption('gradient1',  'Ocean waves')
+        .addOption('gradient2',  'Sunset glow')
+        .addOption('gradient3',  'Purple haze')
+        .addOption('gradient4',  'Peach melba')
+        .addOption('gradient5',  'Mint fresh')
+        .addOption('gradient6',  'Cotton candy')
+        .addOption('gradient7',  'Electric dreams')
+        .addOption('gradient8',  'Spring meadow')
+        .addOption('gradient9',  'Cloud nine')
+        .addOption('gradient10', 'Forest breeze')
+        .addOption('solid',      'Solid color')
         .setValue(this.plugin.settings.highlightStyle)
         .onChange(async (value) => {
           this.plugin.settings.highlightStyle = value as HighlightStyle;
@@ -129,7 +129,7 @@ export class GlossarySettingTab extends PluginSettingTab {
       .setName('Preview')
       .setDesc('How highlighted terms appear in your notes.');
     previewSetting.controlEl.createEl('span', {
-      text: 'Sample Term',
+      text: 'Sample term',
       cls: 'glossary-preview',
     });
 
@@ -138,7 +138,7 @@ export class GlossarySettingTab extends PluginSettingTab {
       .setName('Include folders')
       .setDesc('Only highlight terms in these folders (comma-separated). Empty = all folders.')
       .addText(t => t
-        .setPlaceholder('folder1, folder2')
+        .setPlaceholder('Projects, journal')
         .setValue(this.plugin.settings.includeFolders.join(', '))
         .inputEl.addEventListener('blur', () => {
           this.plugin.settings.includeFolders = parseList(t.getValue());
@@ -151,7 +151,7 @@ export class GlossarySettingTab extends PluginSettingTab {
       .setName('Exclude folders')
       .setDesc('Never highlight terms in these folders (comma-separated).')
       .addText(t => t
-        .setPlaceholder('Private, Archive')
+        .setPlaceholder('Private, archive')
         .setValue(this.plugin.settings.excludeFolders.join(', '))
         .inputEl.addEventListener('blur', () => {
           this.plugin.settings.excludeFolders = parseList(t.getValue());
