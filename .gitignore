@@ -2,3 +2,5 @@ node_modules/
 main.js
 .DS_Store
 .planning/
+
+e2e/.output/

@@ -13,9 +13,17 @@ npm run build
 
 # Type-check only
 npx tsc -noEmit -skipLibCheck
+
+# Unit tests (Jest, pure logic, in tests/)
+npm test
+
+# End-to-end tests in a real, sandboxed Obsidian (via ../ObsidianE2EHarness)
+npm run test:e2e
+npm run test:e2e -- --spec glossaryView   # one spec file
+npm run test:all                           # unit tests, then e2e
 ```
 
-There are no tests. To verify changes: build with `npm run build`, then copy `main.js` + `manifest.json` into an Obsidian vault's `.obsidian/plugins/obsidian-glossary/` folder and reload plugins.
+`test:e2e` and `test:all` run on this machine only. They open an Obsidian window that takes the keyboard until the run ends, so say so before starting one. Spec files in `e2e/specs/` must not gain imports; see [e2e/README.md](e2e/README.md). For manual checks: copy `main.js` + `manifest.json` into a vault's `.obsidian/plugins/obsidian-glossary/` folder and reload plugins.
 
 ## Architecture
 

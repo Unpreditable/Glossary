@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "test": "jest --no-coverage"
+    "test": "jest --no-coverage",
+    "test:e2e": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-e2e.mjs",
+    "test:all": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-test-all.mjs"
   },
   "devDependencies": {
     "@codemirror/language": "^6.12.2",
