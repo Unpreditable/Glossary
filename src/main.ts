@@ -32,7 +32,6 @@ export default class GlossaryPlugin extends Plugin {
       this.viewPluginSpec,
       createTooltipExtension(this.viewPluginSpec),
     ]);
-    console.log("Smart Glossary loaded");
 
     this.debouncedRebuild = debounce(
       () => { void this.buildGlossaryIndex({ silent: true }); },
@@ -231,7 +230,6 @@ export default class GlossaryPlugin extends Plugin {
     if (generation !== this.buildGeneration) return;
     this.termIndex = termIndex;
     this.indexedFiles = new Set(glossaryFiles.map((file) => file.path));
-    console.log(`Glossary index built: ${termCount} terms from ${glossaryFiles.length} file(s)`);
     this.matcher = new TermMatcher(this.termIndex, this.settings);
     // Open editors cache matches from the previous matcher (or none, on startup).
     this.refreshEditors();
