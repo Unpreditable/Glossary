@@ -42,7 +42,6 @@ interface PluginRef {
   settings: GlossarySettings;
 }
 
-const LOOKAHEAD_BYTES = 4000; // approx 50 lines × 80 chars
 /** The line cache is dropped wholesale past this many distinct lines; it refills from what's visible. */
 const MAX_CACHED_LINES = 5000;
 
@@ -98,26 +97,12 @@ export class GlossaryViewPlugin {
     const builder = new RangeSetBuilder<Decoration>();
     const doc = view.state.doc;
 
-    // Pass 1: populate cache for visible ranges + lookahead
-    for (const range of view.visibleRanges) {
-      const lookaheadPos = Math.min(doc.length, range.to + LOOKAHEAD_BYTES);
-      const scanToLine = doc.lineAt(lookaheadPos);
-      const scanTo = scanToLine.to;
-
-      let lineObj = doc.lineAt(range.from);
-      while (lineObj.from <= scanTo) {
-        this.lineMatches(lineObj.text, this.plugin.matcher);
-        if (lineObj.to >= doc.length) break;
-        lineObj = doc.lineAt(lineObj.to + 1);
-      }
-    }
-
     // Pre-compute which line offsets are inside fenced code blocks by scanning
     // from the beginning of the document. This text-based approach is reliable
     // regardless of Lezer parser node name variations across Obsidian versions.
     const fencedLineOffsets = this.computeFencedLineOffsets(view);
 
-    // Pass 2: add only matches within visible ranges to the builder
+    // Add the matches within the visible ranges; each line is matched on first sight and cached.
     for (const range of view.visibleRanges) {
       let lineObj = doc.lineAt(range.from);
       while (lineObj.from <= range.to) {
