@@ -121,22 +121,6 @@ body.glossary-style-solid :is(.cm-glossary-highlight, .glossary-preview) {
 .glossary-view-search {
   flex: 1;
 }
-.glossary-view-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 5px;
-  cursor: pointer;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-.glossary-view-icon-btn:hover {
-  color: var(--text-normal);
-  border-color: var(--background-modifier-border);
-}
 .glossary-view-source-btn {
   font-size: var(--font-ui-small);
   padding: 3px 10px;

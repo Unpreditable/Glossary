@@ -285,12 +285,12 @@ describe("The Glossary View", () => {
     expect(await businessTable()).toEqual(BUSINESS_AFTER_KPI_EDIT);
   });
 
-  it("uses the widths stored in the note", async () => {
+  it("uses the widths stored in the note, also when they change while it is open", async () => {
+    // Written to disk, as another program would: the view picks the change up by itself.
     await obsidianPage.write(NOTE, (await obsidianPage.read(NOTE)).replace(
       "# Tech\n\n",
       "# Tech\n\n%%glossary_column_width=50|30|20%%\n",
     ));
-    await $(".glossary-view-icon-btn[aria-label='Refresh']").click();
     await browser.waitUntil(
       async () => (await $(`${SECTION}:nth-child(1) col`).getAttribute("style")) === "width: 50%;",
       { timeoutMsg: "the stored widths were never applied" },

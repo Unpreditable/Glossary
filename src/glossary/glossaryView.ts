@@ -1,4 +1,4 @@
-import { ItemView, SearchComponent, TFile, ViewStateResult, WorkspaceLeaf, setIcon } from 'obsidian';
+import { ItemView, SearchComponent, TFile, ViewStateResult, WorkspaceLeaf } from 'obsidian';
 import type GlossaryPlugin from '../main';
 import {
   parseFileTables,
@@ -9,6 +9,15 @@ import {
 import type { ViewRow, ViewTable } from './glossaryFileParser';
 
 export const GLOSSARY_VIEW_TYPE = 'glossary-view';
+
+/** Sets a table's <col> widths: the ones stored in the note, or defaults by column count. */
+function applyColWidths(colgroup: Element, table: ViewTable): void {
+  const defaults = table.colCount === 3 ? [12, 25, 63] : table.colCount === 2 ? [18, 82] : null;
+  const widths = table.colWidths ?? defaults;
+  colgroup.querySelectorAll<HTMLElement>('col').forEach((col, c) => {
+    col.style.width = widths ? `${widths[c]}%` : '';
+  });
+}
 
 function sameCells(a: string[] | undefined, b: string[]): boolean {
   return !!a && a.length === b.length && a.every((v, i) => v === b[i]);
@@ -140,10 +149,6 @@ export class GlossaryItemView extends ItemView {
       });
     search.inputEl.parentElement?.addClass('glossary-view-search');
 
-    const refreshBtn = toolbar.createEl('button', { cls: 'glossary-view-icon-btn', attr: { 'aria-label': 'Refresh' } });
-    setIcon(refreshBtn, 'refresh-cw');
-    refreshBtn.addEventListener('click', () => void this.loadAndRender());
-
     toolbar.createEl('button', { text: 'View source', cls: 'glossary-view-source-btn' })
       .addEventListener('click', () => {
         void (async () => {
@@ -178,12 +183,8 @@ export class GlossaryItemView extends ItemView {
     const tableEl = section.createEl('table', { cls: 'glossary-view-table' });
 
     const colgroup = tableEl.createEl('colgroup');
-    const defaults = table.colCount === 3 ? [12, 25, 63] : table.colCount === 2 ? [18, 82] : null;
-    const widths = table.colWidths ?? defaults;
-    for (let c = 0; c < table.colCount; c++) {
-      const col = colgroup.createEl('col');
-      if (widths) col.style.width = `${widths[c]}%`;
-    }
+    for (let c = 0; c < table.colCount; c++) colgroup.createEl('col');
+    applyColWidths(colgroup, table);
 
     const thead = tableEl.createEl('thead');
     const headerTr = thead.createEl('tr');
@@ -487,6 +488,9 @@ export class GlossaryItemView extends ItemView {
       p.rows.forEach((r, j) => { t.rows[j].lineIdx = r.lineIdx; });
       t.colWidths = p.colWidths;
       t.colWidthsLineIdx = p.colWidthsLineIdx;
+      // Widths can change with the cells unchanged (another program, Sync); show them.
+      const colgroup = this.sectionEls[i]?.querySelector('colgroup');
+      if (colgroup) applyColWidths(colgroup, t);
     });
     return true;
   }
