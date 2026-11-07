@@ -67,6 +67,6 @@ npm run build
 
 - All CodeMirror packages (`@codemirror/*`, `@lezer/*`) and `obsidian` are `external` in esbuild — they must never be bundled; they are provided by Obsidian at runtime.
 - `tsconfig.json` sets `baseUrl: "src"` — imports within `src/` can be relative or root-relative from `src`.
-- Obsidian minimum version: 1.9.12 (CM6 only; no CM5/legacy editor support needed).
+- Obsidian minimum version: 1.13.0, for the declarative settings API (`getSettingDefinitions()`), which puts the settings in Obsidian's settings search. The settings tab has no `display()`. The `obsidian` typings and `@codemirror/state`/`view` are pinned to the exact versions one Obsidian release ships (currently 1.14.4); bump them together.
 - `npm run lint` runs the same eslint-plugin-obsidianmd rules as Obsidian's review bot, over every `.ts` file and `manifest.json`. Never switch a rule off or add an `eslint-disable` comment; change the code instead.
 - No `<style>` or `<link>` elements and no inline `style` assignments: CSS goes in `styles.css`, settings-driven values in body classes or CSS variables (`setCssProps`).

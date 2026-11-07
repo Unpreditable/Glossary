@@ -25,6 +25,7 @@ meanwhile.
 | `vault/Notes.md` | A note that mentions a defined acronym |
 | `specs/glossaryView.e2e.ts` | The Glossary View: editing, adding a term, column widths, staying open on reload |
 | `specs/highlight.e2e.ts` | Terms highlighted in the editor |
+| `specs/settings.e2e.ts` | The settings tab. Settings open in a window of their own, so specs reach it through `app.setting.activeTab.containerEl`, not `document` |
 | `tsconfig.json` | Type-checks the specs |
 | `harness.d.ts` | The harness's declarations of everything a spec can use. A copy: do not edit it |
 

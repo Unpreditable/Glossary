@@ -2,7 +2,7 @@
 	"id": "glossary",
 	"name": "Smart Glossary",
 	"version": "1.0.0",
-	"minAppVersion": "1.9.12",
+	"minAppVersion": "1.13.0",
 	"description": "Highlights glossary acronyms and terms in your notes, shows their definitions on hover, and opens glossary notes as editable tables.",
 	"author": "Vitaly Ditman",
 	"isDesktopOnly": false

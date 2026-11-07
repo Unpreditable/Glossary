@@ -1,169 +1,114 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, debounce } from 'obsidian';
+import type { SettingDefinitionItem } from 'obsidian';
 import type GlossaryPlugin from '../main';
-import type { MatchBy, HighlightStyle } from '../settings';
+import type { GlossarySettings } from '../settings';
+
+type Key = keyof GlossarySettings;
 
 /** A comma-separated text field's value as a list, without blanks. */
 function parseList(value: string): string[] {
   return value.split(',').map(s => s.trim()).filter(s => s.length > 0);
 }
 
+/**
+ * Declarative settings (Obsidian 1.13+), so they show up in Obsidian's settings search.
+ * Values go through getControlValue/setControlValue: the comma-separated lists are stored as
+ * arrays, and every change re-applies the styles and rebuilds the index.
+ */
 export class GlossarySettingTab extends PluginSettingTab {
+  // Text fields report every keystroke; rebuild once typing pauses.
+  private rebuildSoon = debounce(() => { void this.plugin.buildGlossaryIndex({ silent: true }); }, 500, true);
+
   constructor(app: App, private plugin: GlossaryPlugin) {
     super(app, plugin);
   }
 
-  display(): void {
-    const { containerEl } = this;
-    containerEl.empty();
-
-    // --- Match by ---
-    new Setting(containerEl)
-      .setName('Match by')
-      .setDesc('What to highlight from 3-column tables. 2-column tables always match by acronym.')
-      .addDropdown(dd => dd
-        .addOption('acronym', 'Acronym only')
-        .addOption('term', 'Term only')
-        .addOption('both', 'Acronym and term')
-        .setValue(this.plugin.settings.matchBy)
-        .onChange(async (value) => {
-          this.plugin.settings.matchBy = value as MatchBy;
-          await this.save();
-          this.display();
-        }),
-      );
-
-    // --- Case sensitive ---
-    new Setting(containerEl)
-      .setName('Case sensitive')
-      .setDesc('Match full terms with exact case. Acronyms are always case-sensitive.')
-      .addToggle(t => t
-        .setValue(this.plugin.settings.caseSensitive)
-        .onChange(async (value) => {
-          this.plugin.settings.caseSensitive = value;
-          await this.save();
-        }),
-      );
-
-    // --- Fuzzy matching ---
-    new Setting(containerEl)
-      .setName('Fuzzy matching')
-      .setDesc('Match near-spellings of full terms (handles plurals and minor typos).')
-      .addToggle(t => t
-        .setValue(this.plugin.settings.fuzzyMatching)
-        .onChange(async (value) => {
-          this.plugin.settings.fuzzyMatching = value;
-          await this.save();
-        }),
-      );
-
-    // --- Exclude acronyms (conditional) ---
-    if (this.plugin.settings.matchBy === 'acronym' || this.plugin.settings.matchBy === 'both') {
-      new Setting(containerEl)
-        .setName('Exclude acronyms')
-        .setDesc('Comma-separated list of acronyms to never highlight (e.g. API, UI).')
-        .addText(t => t
-          .setPlaceholder('API, UI, CSS')
-          .setValue(this.plugin.settings.excludeAcronyms.join(', '))
-          .inputEl.addEventListener('blur', () => {
-            this.plugin.settings.excludeAcronyms = parseList(t.getValue());
-            void this.save();
-          }),
-        );
-    }
-
-    // --- Exclude terms (conditional) ---
-    if (this.plugin.settings.matchBy === 'term' || this.plugin.settings.matchBy === 'both') {
-      new Setting(containerEl)
-        .setName('Exclude terms')
-        .setDesc('Comma-separated list of full terms to never highlight.')
-        .addText(t => t
-          .setPlaceholder('Data, system, process')
-          .setValue(this.plugin.settings.excludeTerms.join(', '))
-          .inputEl.addEventListener('blur', () => {
-            this.plugin.settings.excludeTerms = parseList(t.getValue());
-            void this.save();
-          }),
-        );
-    }
-
-    // --- Highlight style ---
-    new Setting(containerEl)
-      .setName('Highlight style')
-      .setDesc('Visual style for highlighted glossary terms.')
-      .addDropdown(dd => dd
-        .addOption('gradient1',  'Ocean waves')
-        .addOption('gradient2',  'Sunset glow')
-        .addOption('gradient3',  'Purple haze')
-        .addOption('gradient4',  'Peach melba')
-        .addOption('gradient5',  'Mint fresh')
-        .addOption('gradient6',  'Cotton candy')
-        .addOption('gradient7',  'Electric dreams')
-        .addOption('gradient8',  'Spring meadow')
-        .addOption('gradient9',  'Cloud nine')
-        .addOption('gradient10', 'Forest breeze')
-        .addOption('solid',      'Solid color')
-        .setValue(this.plugin.settings.highlightStyle)
-        .onChange(async (value) => {
-          this.plugin.settings.highlightStyle = value as HighlightStyle;
-          await this.save();
-          this.display();
-        }),
-      );
-
-    // --- Highlight color (conditional on solid style) ---
-    if (this.plugin.settings.highlightStyle === 'solid') {
-      new Setting(containerEl)
-        .setName('Highlight color')
-        .setDesc('Color used for solid underline highlighting.')
-        .addColorPicker(cp => cp
-          .setValue(this.plugin.settings.highlightColor)
-          .onChange(async (value) => {
-            this.plugin.settings.highlightColor = value;
-            await this.save();
-          }),
-        );
-    }
-
-    // --- Live preview ---
-    const previewSetting = new Setting(containerEl)
-      .setName('Preview')
-      .setDesc('How highlighted terms appear in your notes.');
-    previewSetting.controlEl.createSpan({
-      text: 'Sample term',
-      cls: 'glossary-preview',
-    });
-
-    // --- Include folders ---
-    new Setting(containerEl)
-      .setName('Include folders')
-      .setDesc('Only highlight terms in these folders (comma-separated). Empty = all folders.')
-      .addText(t => t
-        .setPlaceholder('Projects, journal')
-        .setValue(this.plugin.settings.includeFolders.join(', '))
-        .inputEl.addEventListener('blur', () => {
-          this.plugin.settings.includeFolders = parseList(t.getValue());
-          void this.save();
-        }),
-      );
-
-    // --- Exclude folders ---
-    new Setting(containerEl)
-      .setName('Exclude folders')
-      .setDesc('Never highlight terms in these folders (comma-separated).')
-      .addText(t => t
-        .setPlaceholder('Private, archive')
-        .setValue(this.plugin.settings.excludeFolders.join(', '))
-        .inputEl.addEventListener('blur', () => {
-          this.plugin.settings.excludeFolders = parseList(t.getValue());
-          void this.save();
-        }),
-      );
+  getSettingDefinitions(): SettingDefinitionItem<Key>[] {
+    const s = this.plugin.settings;
+    return [
+      {
+        name: 'Match by',
+        desc: 'What to highlight from 3-column tables. 2-column tables always match by acronym.',
+        control: {
+          type: 'dropdown', key: 'matchBy',
+          options: { acronym: 'Acronym only', term: 'Term only', both: 'Acronym and term' },
+        },
+      },
+      {
+        name: 'Case sensitive',
+        desc: 'Match full terms with exact case. Acronyms are always case-sensitive.',
+        control: { type: 'toggle', key: 'caseSensitive' },
+      },
+      {
+        name: 'Fuzzy matching',
+        desc: 'Match near-spellings of full terms (handles plurals and minor typos).',
+        control: { type: 'toggle', key: 'fuzzyMatching' },
+      },
+      {
+        name: 'Exclude acronyms',
+        desc: 'Comma-separated list of acronyms to never highlight (e.g. API, UI).',
+        visible: () => s.matchBy !== 'term',
+        control: { type: 'text', key: 'excludeAcronyms', placeholder: 'API, UI, CSS' },
+      },
+      {
+        name: 'Exclude terms',
+        desc: 'Comma-separated list of full terms to never highlight.',
+        visible: () => s.matchBy !== 'acronym',
+        control: { type: 'text', key: 'excludeTerms', placeholder: 'Data, system, process' },
+      },
+      {
+        name: 'Highlight style',
+        desc: 'Visual style for highlighted glossary terms.',
+        control: {
+          type: 'dropdown', key: 'highlightStyle',
+          options: {
+            gradient1: 'Ocean waves', gradient2: 'Sunset glow', gradient3: 'Purple haze',
+            gradient4: 'Peach melba', gradient5: 'Mint fresh', gradient6: 'Cotton candy',
+            gradient7: 'Electric dreams', gradient8: 'Spring meadow', gradient9: 'Cloud nine',
+            gradient10: 'Forest breeze', solid: 'Solid color',
+          },
+        },
+      },
+      {
+        name: 'Highlight color',
+        desc: 'Color used for solid underline highlighting.',
+        visible: () => s.highlightStyle === 'solid',
+        control: { type: 'color', key: 'highlightColor' },
+      },
+      {
+        name: 'Preview',
+        desc: 'How highlighted terms appear in your notes.',
+        searchable: false,
+        render: (setting) => { setting.controlEl.createSpan({ text: 'Sample term', cls: 'glossary-preview' }); },
+      },
+      {
+        name: 'Include folders',
+        desc: 'Only highlight terms in these folders (comma-separated). Empty = all folders.',
+        control: { type: 'text', key: 'includeFolders', placeholder: 'Projects, journal' },
+      },
+      {
+        name: 'Exclude folders',
+        desc: 'Never highlight terms in these folders (comma-separated).',
+        control: { type: 'text', key: 'excludeFolders', placeholder: 'Private, archive' },
+      },
+    ];
   }
 
-  private async save(): Promise<void> {
+  getControlValue(key: string): unknown {
+    const value = this.plugin.settings[key as Key];
+    return Array.isArray(value) ? value.join(', ') : value;
+  }
+
+  async setControlValue(key: string, value: unknown): Promise<void> {
+    const settings = this.plugin.settings as unknown as Record<string, unknown>;
+    const isList = Array.isArray(settings[key]);
+    settings[key] = isList ? parseList(String(value)) : value;
     await this.plugin.saveSettings();
     this.plugin.refreshStyles();
+    // Exclusions and highlight color show or hide with the match mode and the style.
+    this.refreshDomState();
     // Rebuilds the index against the new settings and redecorates the open editors.
-    await this.plugin.buildGlossaryIndex({ silent: true });
+    if (isList) this.rebuildSoon();
+    else await this.plugin.buildGlossaryIndex({ silent: true });
   }
 }

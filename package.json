@@ -9,12 +9,12 @@
     "test": "jest --no-coverage",
     "test:e2e": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-e2e.mjs",
     "test:all": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-test-all.mjs",
-    "lint": "eslint ."
+    "lint": "eslint . --max-warnings 0"
   },
   "devDependencies": {
     "@codemirror/language": "^6.12.2",
-    "@codemirror/state": "6.5.0",
-    "@codemirror/view": "6.38.6",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
     "@eslint/js": "^9.39.4",
     "@lezer/common": "^1.5.1",
     "@types/jest": "^30.0.0",
@@ -24,7 +24,7 @@
     "eslint-plugin-obsidianmd": "^0.4.2",
     "globals": "^17.4.0",
     "jest": "^30.3.0",
-    "obsidian": "^1.12.3",
+    "obsidian": "1.14.4",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1"
