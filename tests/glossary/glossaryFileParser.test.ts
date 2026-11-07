@@ -73,14 +73,34 @@ describe('writers on a table with an empty row', () => {
   });
 });
 
+// A table right under a text line is part of that paragraph in Markdown, and isn't rendered.
+describe('setColWidthsInContent', () => {
+  it('leaves a blank line between the width comment and the table', () => {
+    const out = lines(setColWidthsInContent(CONTENT, parseFileTables(CONTENT)[0], [30, 70]));
+    expect(out.slice(0, 5)).toEqual(['# Tech', '', '%%glossary_column_width=30|70%%', '', '| Acronym | Description |']);
+  });
+
+  it('adds the blank line under a comment written without one', () => {
+    const content = '%%glossary_column_width=50|50%%\n| A | B |\n|---|---|\n| X | Y |';
+    const out = lines(setColWidthsInContent(content, parseFileTables(content)[0], [30, 70]));
+    expect(out.slice(0, 3)).toEqual(['%%glossary_column_width=30|70%%', '', '| A | B |']);
+  });
+
+  it('replaces a comment in place when the blank line is there', () => {
+    const once = setColWidthsInContent(CONTENT, parseFileTables(CONTENT)[0], [30, 70]);
+    const twice = setColWidthsInContent(once, parseFileTables(once)[0], [40, 60]);
+    expect(twice).toBe(once.replace('30|70', '40|60'));
+  });
+});
+
 describe('writers with a stale table', () => {
   it('use current line positions after the file shifted', () => {
     const business = parseFileTables(CONTENT)[1];
-    // A width line added above the first table pushes the second one down a line.
+    // A width line and its blank line added above the first table push the second one down two lines.
     const shifted = setColWidthsInContent(CONTENT, parseFileTables(CONTENT)[0], [30, 70]);
     const out = lines(writeRowToContent(shifted, business, 0, ['KPI', 'Edited']));
-    expect(out[11]).toBe('| KPI | Edited |');
-    expect(out[12]).toBe('| | |');
+    expect(out[12]).toBe('| KPI | Edited |');
+    expect(out[13]).toBe('| | |');
   });
 
   it('leave the content unchanged when the table no longer exists', () => {

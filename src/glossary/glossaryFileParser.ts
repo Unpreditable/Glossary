@@ -143,10 +143,13 @@ export function setColWidthsInContent(
   const fresh = freshTable(lines, table);
   if (!fresh) return content;
   const line = `%%glossary_column_width=${widths.join('|')}%%`;
-  if (fresh.colWidthsLineIdx !== null) {
-    lines[fresh.colWidthsLineIdx] = line;
+  // A blank line between comment and table: a table right under a text line is part of that
+  // paragraph in Markdown, so Obsidian wouldn't render it.
+  if (fresh.colWidthsLineIdx === null) {
+    lines.splice(fresh.headerLineIdx, 0, line, '');
   } else {
-    lines.splice(fresh.headerLineIdx, 0, line);
+    lines[fresh.colWidthsLineIdx] = line;
+    if (fresh.colWidthsLineIdx === fresh.headerLineIdx - 1) lines.splice(fresh.headerLineIdx, 0, '');
   }
   return lines.join(eol);
 }

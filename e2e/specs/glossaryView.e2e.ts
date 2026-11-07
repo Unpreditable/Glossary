@@ -266,8 +266,10 @@ describe("The Glossary View", () => {
     );
     const lines = await noteLines();
     const at = lines.findIndex((l) => l.startsWith("%%glossary_column_width="));
-    // Above the second table's header, with three whole percentages that add up to 100.
-    expect(lines[at + 1]).toBe("| Acronym | Full term | Description |");
+    // Above the second table's header, a blank line apart so the table still renders,
+    // with three whole percentages that add up to 100.
+    expect(lines[at + 1]).toBe("");
+    expect(lines[at + 2]).toBe("| Acronym | Full term | Description |");
     expect(lines.slice(0, at)).toContain("# Business");
     const widths = lines[at].slice("%%glossary_column_width=".length, -2).split("|").map(Number);
     expect(widths).toHaveLength(3);
