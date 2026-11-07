@@ -217,7 +217,7 @@ export class AddTermModal extends Modal {
       text: `Added "${this.acronym || this.fullTerm}" to ${this.targetFile.basename} ✓`,
     });
     msg.addClass('glossary-modal-done');
-    setTimeout(() => this.close(), 1000);
+    window.setTimeout(() => this.close(), 1000);
   }
 
   /** The row's cells: three columns with a full term, two (acronym, description) without. */

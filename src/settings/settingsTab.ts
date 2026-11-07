@@ -128,7 +128,7 @@ export class GlossarySettingTab extends PluginSettingTab {
     const previewSetting = new Setting(containerEl)
       .setName('Preview')
       .setDesc('How highlighted terms appear in your notes.');
-    previewSetting.controlEl.createEl('span', {
+    previewSetting.controlEl.createSpan({
       text: 'Sample term',
       cls: 'glossary-preview',
     });

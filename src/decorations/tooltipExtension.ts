@@ -6,10 +6,10 @@ import type { GlossaryTerm } from '../index/termIndex';
 type ViewPluginSpec = ReturnType<typeof createGlossaryViewPlugin>;
 
 /** The tooltip body: the first definition, a count of the others, and where it comes from. */
-function renderTooltip(doc: Document, terms: GlossaryTerm[]): HTMLElement {
+function renderTooltip(terms: GlossaryTerm[]): HTMLElement {
   const term = terms[0];
-  const dom = doc.createElement('div');
-  dom.className = 'cm-tooltip-glossary';
+  // Detached; CodeMirror inserts it into the editor's window, which adopts it (popouts too).
+  const dom = createDiv({ cls: 'cm-tooltip-glossary' });
 
   // Each part is one line; createEl sets text, so nothing from the glossary is parsed as HTML.
   const parts: Array<(el: HTMLElement) => void> = [];
@@ -48,8 +48,7 @@ export function createTooltipExtension(viewPluginSpec: ViewPluginSpec): Extensio
         pos: from,
         end: to,
         above: true,
-        // The editor's own document, which is a popout window's when the note is in one.
-        create: (editor) => ({ dom: renderTooltip(editor.dom.doc, terms) }),
+        create: () => ({ dom: renderTooltip(terms) }),
       };
     });
 

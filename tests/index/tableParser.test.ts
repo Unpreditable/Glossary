@@ -64,10 +64,8 @@ describe('parseGlossaryFile', () => {
 describe('buildTermIndex', () => {
   it('gives overlapping builds an index each, with every term once', async () => {
     const content = ['| A | B |', '|---|---|', '| API | A contract |'].join('\n');
-    // Reads resolve after a delay, so the two builds interleave.
-    const app = {
-      vault: { read: () => new Promise<string>((resolve) => setTimeout(() => resolve(content), 5)) },
-    } as unknown as App;
+    // Every awaited read hands control to the other build, so the two interleave file by file.
+    const app = { vault: { read: async () => content } } as unknown as App;
     const files = [makeMockFile('one.md'), makeMockFile('two.md')];
     const [first, second] = await Promise.all([
       buildTermIndex(app, files, SETTINGS),

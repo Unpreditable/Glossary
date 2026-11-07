@@ -195,7 +195,7 @@ export class GlossaryItemView extends ItemView {
     const addArea = section.createDiv({ cls: 'glossary-view-add-area' });
     addArea.createEl('button', { text: 'Add term', cls: 'glossary-view-add-btn' })
       .addEventListener('click', () => this.addNewRow(tbody, table));
-    addArea.createEl('span', { text: 'New items will appear in alphabetical order on next open', cls: 'glossary-view-add-hint' });
+    addArea.createSpan({ text: 'New items will appear in alphabetical order on next open', cls: 'glossary-view-add-hint' });
   }
 
   // Creates a show/edit cell: display span (rendered markdown) + hidden input.
@@ -203,7 +203,7 @@ export class GlossaryItemView extends ItemView {
   private makeCell(tr: HTMLTableRowElement, value: string): HTMLInputElement {
     const td = tr.createEl('td');
 
-    const display = td.createEl('span', { cls: 'glossary-cell-display' });
+    const display = td.createSpan({ cls: 'glossary-cell-display' });
     renderInline(value || '\u00a0', display);
 
     const input = td.createEl('input', { type: 'text', cls: 'glossary-cell-input' });
@@ -269,7 +269,7 @@ export class GlossaryItemView extends ItemView {
     };
 
     for (let c = 0; c < table.colCount; c++) {
-      inputs[c].addEventListener('blur', () => setTimeout(trySave, 0));
+      inputs[c].addEventListener('blur', () => window.setTimeout(trySave, 0));
       this.wireKeys(inputs[c], c, inputs, tbody, table, true);
     }
 
@@ -289,13 +289,13 @@ export class GlossaryItemView extends ItemView {
       if (e.key === 'Tab') {
         e.preventDefault();
         const next = inputs[c + 1] ?? inputs[0];
-        setTimeout(() => this.focusDisplay(next), 0);
+        window.setTimeout(() => this.focusDisplay(next), 0);
         return;
       }
 
       if (e.key === 'Enter') {
         e.preventDefault();
-        setTimeout(() => {
+        window.setTimeout(() => {
           const currentTr = input.closest('tr');
           const nextTr = currentTr?.nextElementSibling as HTMLElement | null;
           if (nextTr) {
@@ -312,7 +312,7 @@ export class GlossaryItemView extends ItemView {
 
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setTimeout(() => {
+        window.setTimeout(() => {
           const nextTr = input.closest('tr')?.nextElementSibling as HTMLElement | null;
           if (nextTr) {
             nextTr.querySelectorAll<HTMLElement>('.glossary-cell-display')[c]?.click();
@@ -323,7 +323,7 @@ export class GlossaryItemView extends ItemView {
 
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setTimeout(() => {
+        window.setTimeout(() => {
           const prevTr = input.closest('tr')?.previousElementSibling as HTMLElement | null;
           if (prevTr) {
             prevTr.querySelectorAll<HTMLElement>('.glossary-cell-display')[c]?.click();
@@ -337,7 +337,7 @@ export class GlossaryItemView extends ItemView {
         const next = inputs[c + 1];
         if (atEnd && next) {
           e.preventDefault();
-          setTimeout(() => this.focusDisplay(next), 0);
+          window.setTimeout(() => this.focusDisplay(next), 0);
         }
         return;
       }
@@ -347,7 +347,7 @@ export class GlossaryItemView extends ItemView {
         const prev = inputs[c - 1];
         if (atStart && prev) {
           e.preventDefault();
-          setTimeout(() => this.focusDisplay(prev), 0);
+          window.setTimeout(() => this.focusDisplay(prev), 0);
         }
       }
     });
@@ -418,7 +418,7 @@ export class GlossaryItemView extends ItemView {
     const MIN_W = 60;
 
     for (let i = 0; i < colCount - 1; i++) {
-      const handle = ths[i].createEl('span', { cls: 'glossary-col-resize-handle' });
+      const handle = ths[i].createSpan({ cls: 'glossary-col-resize-handle' });
 
       handle.addEventListener('mousedown', (e) => {
         e.preventDefault();

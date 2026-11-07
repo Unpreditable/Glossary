@@ -98,7 +98,7 @@ export default class GlossaryPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on('active-leaf-change', (leaf) => {
         if (!leaf || leaf.view.getViewType() !== 'markdown') return;
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (leaf.view.getViewType() !== 'markdown') return;
           const file = (leaf.view as MarkdownView).file;
           if (!file || !isGlossaryFile(this.app, file)) return;
@@ -111,7 +111,7 @@ export default class GlossaryPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on('file-open', (file) => {
         if (!file || !isGlossaryFile(this.app, file)) return;
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.app.workspace.iterateAllLeaves((leaf) => {
             if (leaf.view.getViewType() === 'markdown' &&
                 (leaf.view as MarkdownView).file?.path === file.path) {
@@ -152,7 +152,7 @@ export default class GlossaryPlugin extends Plugin {
   private handleGlossaryLeaf(leaf: WorkspaceLeaf, filePath: string): void {
     if (this.recentlyHandled.has(filePath)) return;
     this.recentlyHandled.add(filePath);
-    setTimeout(() => this.recentlyHandled.delete(filePath), 1500);
+    window.setTimeout(() => this.recentlyHandled.delete(filePath), 1500);
 
     const pref = this.fileViewPreference.get(filePath) ?? 'glossary';
     if (pref === 'markdown') {
@@ -166,7 +166,7 @@ export default class GlossaryPlugin extends Plugin {
   // if we fire too early. Retry with backoff until the view actually sticks.
   private async redirectToGlossaryView(leaf: WorkspaceLeaf, filePath: string): Promise<void> {
     for (let attempt = 0; attempt < 4; attempt++) {
-      await new Promise<void>((r) => setTimeout(r, 80 + attempt * 120));
+      await new Promise<void>((r) => window.setTimeout(r, 80 + attempt * 120));
       const viewType = leaf.view.getViewType();
       if (viewType !== 'markdown') return;
       if ((leaf.view as MarkdownView).file?.path !== filePath) return;
