@@ -330,5 +330,112 @@ describe("The Glossary View", () => {
   });
 });
 
+const OPEN_AS_GLOSSARY = "Open as glossary view";
+/** The active tab in the main area. The sidebars have tab headers of their own. */
+const TAB_HEADER = ".mod-root .workspace-tab-header.is-active";
+/** The header icon that switches the active Markdown tab to the Glossary View. */
+const HEADER_ACTION = `.workspace-leaf.mod-active .view-action[aria-label="${OPEN_AS_GLOSSARY}"]`;
+
+/** The view type of the active tab. */
+async function activeViewType(): Promise<string | undefined> {
+  return browser.executeObsidian(({ app }) => app.workspace.getMostRecentLeaf()?.view.getViewType());
+}
+
+async function waitForActiveView(type: string): Promise<void> {
+  await browser.waitUntil(async () => (await activeViewType()) === type, {
+    timeoutMsg: `the active tab never became ${type}`,
+  });
+}
+
+/** Switches the open Glossary View to the Markdown editor with its "View source" button. */
+async function viewSource(): Promise<void> {
+  await $(`${VIEW} .glossary-view-source-btn`).click();
+  await waitForActiveView("markdown");
+}
+
+/** Right-clicks the first element matching the selector, as a person does. */
+async function rightClick(selector: string): Promise<void> {
+  await browser.execute((sel) => {
+    const el = document.querySelector<HTMLElement>(sel);
+    if (!el) throw new Error(`nothing at ${sel}`);
+    const { left, top } = el.getBoundingClientRect();
+    el.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, clientX: left + 5, clientY: top + 5 }));
+  }, selector);
+  await $(".menu").waitForDisplayed({ timeoutMsg: `right-clicking ${selector} opened no menu` });
+}
+
+/** The titles of the open context menu's items. */
+async function menuItems(): Promise<string[]> {
+  return browser.execute(() =>
+    Array.from(document.querySelectorAll(".menu .menu-item-title")).map((el) => el.textContent ?? ""));
+}
+
+async function clickMenuItem(title: string): Promise<void> {
+  await browser.execute((t) => {
+    const item = Array.from(document.querySelectorAll<HTMLElement>(".menu .menu-item"))
+      .find((el) => el.querySelector(".menu-item-title")?.textContent === t);
+    if (!item) throw new Error(`no menu item "${t}"`);
+    item.click();
+  }, title);
+}
+
+async function closeMenu(): Promise<void> {
+  await browser.keys("Escape");
+  await $(".menu").waitForExist({ reverse: true, timeoutMsg: "the menu stayed open" });
+}
+
+describe("Switching between the Markdown editor and the Glossary View", () => {
+  beforeEach(async () => {
+    await resetState();
+    await openGlossary();
+  });
+
+  it("switches back from the editor with the icon in the tab header", async () => {
+    await viewSource();
+    // The icon sits in the header, not in a row of its own above the note.
+    expect(await $(".glossary-source-prompt").isExisting()).toBe(false);
+    await $(HEADER_ACTION).click();
+    await waitForActiveView(VIEW_TYPE);
+    await $(`${VIEW} ${SECTION}`).waitForDisplayed({ timeoutMsg: "the Glossary View showed no tables" });
+  });
+
+  it("drops the header icon when the tab opens a note that is not a glossary", async () => {
+    await viewSource();
+    await $(HEADER_ACTION).waitForExist({ timeoutMsg: "the editor had no Open as glossary view icon" });
+    await browser.executeObsidian(async ({ app, obsidian }) => {
+      const file = app.vault.getAbstractFileByPath("Notes.md");
+      if (!(file instanceof obsidian.TFile)) throw new Error("no Notes.md");
+      await app.workspace.getMostRecentLeaf()?.openFile(file);
+    });
+    await $(HEADER_ACTION).waitForExist({ reverse: true, timeoutMsg: "the icon stayed on a note that is not a glossary" });
+  });
+
+  it("switches the tab from the tab header's menu", async () => {
+    await viewSource();
+    await rightClick(TAB_HEADER);
+    await clickMenuItem(OPEN_AS_GLOSSARY);
+    await waitForActiveView(VIEW_TYPE);
+  });
+
+  it("leaves the item out of the tab menu while the tab is the Glossary View", async () => {
+    await rightClick(TAB_HEADER);
+    expect(await menuItems()).not.toContain(OPEN_AS_GLOSSARY);
+    await closeMenu();
+  });
+
+  it("opens the note as the Glossary View from the file explorer's menu", async () => {
+    await viewSource();
+    await rightClick(`.nav-file-title[data-path="${NOTE}"]`);
+    await clickMenuItem(OPEN_AS_GLOSSARY);
+    await waitForActiveView(VIEW_TYPE);
+  });
+
+  it("offers the item only for glossary notes", async () => {
+    await rightClick('.nav-file-title[data-path="Notes.md"]');
+    expect(await menuItems()).not.toContain(OPEN_AS_GLOSSARY);
+    await closeMenu();
+  });
+});
+
 // Keeps this file's names its own: a file with no import or export shares one scope with every other.
 export {};

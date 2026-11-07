@@ -59,6 +59,24 @@ describe('parseGlossaryFile', () => {
     ].join('\n'));
     expect(count).toBe(0);
   });
+
+  it('reads the glossary tables of a note that also has a wider one', async () => {
+    const { termIndex, count } = await index([
+      '| Acronym | Description |',
+      '|---|---|',
+      '| API | A contract |',
+      '',
+      '| Team | Lead | Size | Site | Budget | Status |',
+      '|---|---|---|---|---|---|',
+      '| Core | Ann | 5 | Oslo | 10k | Active |',
+      '',
+      '| Acronym | Full term | Description |',
+      '|---|---|---|',
+      '| KPI | Key Performance Indicator | A measured goal |',
+    ].join('\n'));
+    expect(count).toBe(2);
+    expect(Object.keys(termIndex).sort()).toEqual(['API', 'APIs', 'KPI', 'KPIs', 'key performance indicator']);
+  });
 });
 
 describe('buildTermIndex', () => {

@@ -23,7 +23,7 @@ meanwhile.
 | `e2e.config.json` | The Obsidian version the specs run with; no third-party plugins |
 | `vault/Glossary.md` | A glossary note with two tables; the second has an empty row in the middle |
 | `vault/Notes.md` | A note that mentions a defined acronym |
-| `specs/glossaryView.e2e.ts` | The Glossary View: editing, adding a term, column widths, staying open on reload |
+| `specs/glossaryView.e2e.ts` | The Glossary View: editing, adding a term, column widths, staying open on reload, switching to and from the Markdown editor |
 | `specs/highlight.e2e.ts` | Terms highlighted in the editor |
 | `specs/settings.e2e.ts` | The settings tab. Settings open in a window of their own, so specs reach it through `app.setting.activeTab.containerEl`, not `document` |
 | `tsconfig.json` | Type-checks the specs |
