@@ -240,8 +240,3 @@ body.glossary-style-solid :is(.cm-glossary-highlight, .glossary-preview) {
   color: var(--text-muted);
   padding: 16px 0;
 }
-.glossary-source-prompt {
-  display: flex;
-  justify-content: flex-end;
-  padding: 4px 16px;
-}

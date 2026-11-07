@@ -9,6 +9,8 @@ import {
 import type { ViewRow, ViewTable } from './glossaryFileParser';
 
 export const GLOSSARY_VIEW_TYPE = 'glossary-view';
+/** Lucide icon for the Glossary View: a book with a letter, distinct from the reading-mode book. */
+export const GLOSSARY_ICON = 'book-a';
 
 /** Sets a table's <col> widths: the ones stored in the note, or defaults by column count. */
 function applyColWidths(colgroup: Element, table: ViewTable): void {
@@ -74,7 +76,7 @@ export class GlossaryItemView extends ItemView {
       ? (this.filePath.split('/').pop()?.replace(/\.md$/, '') ?? 'Glossary')
       : 'Glossary';
   }
-  getIcon(): string { return 'book-open'; }
+  getIcon(): string { return GLOSSARY_ICON; }
 
   async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
     await super.setState(state, result);
@@ -156,7 +158,7 @@ export class GlossaryItemView extends ItemView {
           if (!(file instanceof TFile)) return;
           this.plugin.fileViewPreference.set(file.path, 'markdown');
           await this.leaf.openFile(file, { state: { mode: 'source' } });
-          this.plugin.injectGlossaryPrompt(this.leaf, file.path);
+          this.plugin.addGlossaryViewAction(this.leaf, file.path);
         })();
       });
 

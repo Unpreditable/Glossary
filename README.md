@@ -59,8 +59,9 @@ A glossary note opens as tables instead of Markdown.
 - Drag a column border to resize. The widths are saved in the note, as a
   `%%glossary_column_width=…%%` comment above the table.
 - **Search terms** filters the rows; the × clears the search.
-- **View source** switches the tab to the Markdown editor. **Open as glossary view** above the
-  editor switches back.
+- **View source** switches the tab to the Markdown editor. The book-with-A icon in the tab's header,
+  or **Open as glossary view** in the note's right-click menu (file explorer, tab header, or
+  the tab's ⋯ menu), switches back.
 
 ---
 

@@ -9,7 +9,7 @@ import { applyHighlightStyle, removeHighlightStyle } from "./decorations/cssInje
 import { createTooltipExtension } from "./decorations/tooltipExtension";
 import { GlossarySettingTab } from "./settings/settingsTab";
 import { AddTermModal } from "./glossary/addTermModal";
-import { GlossaryItemView, GLOSSARY_VIEW_TYPE } from "./glossary/glossaryView";
+import { GlossaryItemView, GLOSSARY_ICON, GLOSSARY_VIEW_TYPE } from "./glossary/glossaryView";
 
 export default class GlossaryPlugin extends Plugin {
   settings!: GlossarySettings;
@@ -19,6 +19,7 @@ export default class GlossaryPlugin extends Plugin {
   private buildGeneration = 0;
   fileViewPreference: Map<string, 'glossary' | 'markdown'> = new Map();
   private recentlyHandled = new Set<string>();
+  private glossaryActions = new WeakMap<MarkdownView, { el: HTMLElement; path: string }>();
   private debouncedRebuild!: Debouncer<[], void>;
   matcher!: TermMatcher;
 
@@ -84,6 +85,20 @@ export default class GlossaryPlugin extends Plugin {
 
     this.registerView(GLOSSARY_VIEW_TYPE, (leaf) => new GlossaryItemView(leaf, this));
 
+    // File explorer, tab header and the tab's ⋯ menu all fire 'file-menu'.
+    this.registerEvent(
+      this.app.workspace.on('file-menu', (menu, file, _source, leaf) => {
+        if (!(file instanceof TFile) || !isGlossaryFile(this.app, file)) return;
+        if (leaf?.view.getViewType() === GLOSSARY_VIEW_TYPE) return;
+        menu.addItem((item) => item
+          .setTitle('Open as glossary view')
+          .setIcon(GLOSSARY_ICON)
+          .setSection('open')
+          .onClick(() => { void this.openAsGlossaryView(leaf ?? this.app.workspace.getLeaf(false), file.path); }),
+        );
+      }),
+    );
+
     // The per-file view preference is keyed by path; carry it over when a note is renamed.
     this.registerEvent(
       this.app.vault.on('rename', (file, oldPath) => {
@@ -110,6 +125,7 @@ export default class GlossaryPlugin extends Plugin {
     // Fallback: fires when a file opens in the already-active leaf (active-leaf-change won't fire then)
     this.registerEvent(
       this.app.workspace.on('file-open', (file) => {
+        this.removeStaleGlossaryActions();
         if (!file || !isGlossaryFile(this.app, file)) return;
         window.setTimeout(() => {
           this.app.workspace.iterateAllLeaves((leaf) => {
@@ -137,6 +153,9 @@ export default class GlossaryPlugin extends Plugin {
   onunload(): void {
     // Don't detach glossary leaves: Obsidian restores them when the view is re-registered on reload.
     for (const body of this.windowBodies()) removeHighlightStyle(body);
+    this.app.workspace.iterateAllLeaves((leaf) => {
+      if (leaf.view instanceof MarkdownView) this.glossaryActions.get(leaf.view)?.el.remove();
+    });
   }
 
   // Restored leaves on cold start don't reliably fire active-leaf-change/file-open
@@ -156,7 +175,7 @@ export default class GlossaryPlugin extends Plugin {
 
     const pref = this.fileViewPreference.get(filePath) ?? 'glossary';
     if (pref === 'markdown') {
-      this.injectGlossaryPrompt(leaf, filePath);
+      this.addGlossaryViewAction(leaf, filePath);
     } else {
       void this.redirectToGlossaryView(leaf, filePath);
     }
@@ -175,19 +194,32 @@ export default class GlossaryPlugin extends Plugin {
     }
   }
 
-  injectGlossaryPrompt(leaf: WorkspaceLeaf, filePath: string): void {
-    const sourceViewEl = leaf.view.containerEl.querySelector<HTMLElement>('.markdown-source-view');
-    const cmEditor = sourceViewEl?.querySelector('.cm-editor');
-    if (!sourceViewEl || !cmEditor) return;
-    sourceViewEl.querySelector('.glossary-source-prompt')?.remove();
-    // createDiv/createEl build in the view's own document, so this works in popout windows too.
-    const prompt = sourceViewEl.createDiv({ cls: 'glossary-source-prompt' });
-    const btn = prompt.createEl('button', { text: 'Open as glossary view', cls: 'glossary-view-source-btn' });
-    btn.addEventListener('click', () => {
-      this.fileViewPreference.set(filePath, 'glossary');
-      void leaf.setViewState({ type: GLOSSARY_VIEW_TYPE, state: { file: filePath }, active: true });
+  /** Adds an "Open as glossary view" icon to the Markdown view's header actions. */
+  addGlossaryViewAction(leaf: WorkspaceLeaf, filePath: string): void {
+    if (!(leaf.view instanceof MarkdownView)) return;
+    const view = leaf.view;
+    this.glossaryActions.get(view)?.el.remove();
+    const el = view.addAction(GLOSSARY_ICON, 'Open as glossary view', () => {
+      void this.openAsGlossaryView(leaf, filePath);
     });
-    sourceViewEl.insertBefore(prompt, cmEditor);
+    this.glossaryActions.set(view, { el, path: filePath });
+  }
+
+  async openAsGlossaryView(leaf: WorkspaceLeaf, filePath: string): Promise<void> {
+    this.fileViewPreference.set(filePath, 'glossary');
+    await leaf.setViewState({ type: GLOSSARY_VIEW_TYPE, state: { file: filePath }, active: true });
+  }
+
+  /** A Markdown view is reused when its tab opens another note; drop the action there. */
+  private removeStaleGlossaryActions(): void {
+    this.app.workspace.iterateAllLeaves((leaf) => {
+      if (!(leaf.view instanceof MarkdownView)) return;
+      const action = this.glossaryActions.get(leaf.view);
+      if (action && leaf.view.file?.path !== action.path) {
+        action.el.remove();
+        this.glossaryActions.delete(leaf.view);
+      }
+    });
   }
 
   /** Applies the highlight style setting in every window; styles.css holds the rules. */
