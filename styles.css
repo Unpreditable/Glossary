@@ -117,14 +117,9 @@ body.glossary-style-solid :is(.cm-glossary-highlight, .glossary-preview) {
   flex-shrink: 0;
   background: var(--background-primary);
 }
+/* Obsidian's search box (SearchComponent's container); it styles the input and clear button. */
 .glossary-view-search {
   flex: 1;
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--background-modifier-border);
-  background: var(--background-secondary);
-  color: var(--text-normal);
-  font-size: var(--font-ui-small);
 }
 .glossary-view-icon-btn {
   display: flex;

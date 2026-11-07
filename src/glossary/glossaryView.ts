@@ -1,4 +1,4 @@
-import { ItemView, TFile, ViewStateResult, WorkspaceLeaf, setIcon } from 'obsidian';
+import { ItemView, SearchComponent, TFile, ViewStateResult, WorkspaceLeaf, setIcon } from 'obsidian';
 import type GlossaryPlugin from '../main';
 import {
   parseFileTables,
@@ -130,14 +130,15 @@ export class GlossaryItemView extends ItemView {
     contentEl.addClass('glossary-item-view');
 
     const toolbar = contentEl.createDiv({ cls: 'glossary-view-toolbar' });
-    const searchInput = toolbar.createEl('input', {
-      type: 'text', placeholder: 'Search terms…', cls: 'glossary-view-search',
-    });
-    searchInput.value = this.searchQuery;
-    searchInput.addEventListener('input', () => {
-      this.searchQuery = searchInput.value.toLowerCase();
-      this.applySearch();
-    });
+    // Obsidian's search box: its own look, and a clear button that resets the filter.
+    const search = new SearchComponent(toolbar)
+      .setPlaceholder('Search terms…')
+      .setValue(this.searchQuery)
+      .onChange((value) => {
+        this.searchQuery = value.toLowerCase();
+        this.applySearch();
+      });
+    search.inputEl.parentElement?.addClass('glossary-view-search');
 
     const refreshBtn = toolbar.createEl('button', { cls: 'glossary-view-icon-btn', attr: { 'aria-label': 'Refresh' } });
     setIcon(refreshBtn, 'refresh-cw');

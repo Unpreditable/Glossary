@@ -179,6 +179,22 @@ describe("The Glossary View", () => {
     });
   });
 
+  it("filters rows by the search, and shows them all again when it is cleared", async () => {
+    const shownRows = () => browser.execute((sel) =>
+      Array.from(document.querySelectorAll<HTMLElement>(sel)).filter((tr) => tr.style.display !== "none").length,
+    `${VIEW} tbody tr`);
+    expect(await shownRows()).toBe(4);
+
+    await $(`${VIEW} .glossary-view-search input`).click();
+    await browser.keys("cpu".split(""));
+    await browser.waitUntil(async () => (await shownRows()) === 1, { timeoutMsg: "searching for cpu didn't leave one row" });
+
+    await $(`${VIEW} .glossary-view-search .search-input-clear-button`).click();
+    await browser.waitUntil(async () => (await shownRows()) === 4, { timeoutMsg: "clearing the search didn't bring every row back" });
+    expect(await browser.execute((sel) => document.querySelector<HTMLInputElement>(sel)?.value,
+      `${VIEW} .glossary-view-search input`)).toBe("");
+  });
+
   it("keeps a cell's size and text position when it switches to editing", async () => {
     const measure = () => browser.execute((sel) => {
       const td = document.querySelector(sel)?.closest("td");
