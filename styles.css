@@ -182,31 +182,36 @@ body.glossary-style-solid :is(.cm-glossary-highlight, .glossary-preview) {
   vertical-align: middle;
   position: relative;
 }
+/* A cell's label and its edit field share one box, so clicking a cell doesn't move anything.
+   `.glossary-view-table` outranks Obsidian's input[type='text'] height and padding. */
+.glossary-view-table :is(.glossary-cell-display, .glossary-cell-input) {
+  box-sizing: border-box;
+  min-height: calc(1.5em + 8px);
+  margin: 0;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: var(--font-ui-small);
+  line-height: 1.5;
+  color: var(--text-normal);
+}
 .glossary-cell-display {
   display: block;
-  padding: 3px 8px;
-  font-size: var(--font-ui-small);
-  color: var(--text-normal);
   cursor: text;
   white-space: pre-wrap;
   word-break: break-word;
-  min-height: 1.6em;
-  border: 1px solid transparent;
-  border-radius: 3px;
 }
 .glossary-cell-display:hover {
   border-color: var(--background-modifier-border);
 }
-.glossary-cell-input {
+.glossary-view-table .glossary-cell-input {
   width: 100%;
+  height: calc(1.5em + 8px);
   background: var(--background-primary);
-  border: 1px solid var(--interactive-accent);
-  border-radius: 3px;
-  padding: 3px 8px;
-  color: var(--text-normal);
-  font-size: var(--font-ui-small);
-  box-sizing: border-box;
+  border-color: var(--interactive-accent);
   outline: none;
+  box-shadow: none;
 }
 .glossary-row-new td:first-child { position: relative; }
 .glossary-row-new td:first-child::before {

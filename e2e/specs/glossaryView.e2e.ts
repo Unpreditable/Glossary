@@ -179,6 +179,24 @@ describe("The Glossary View", () => {
     });
   });
 
+  it("keeps a cell's size and text position when it switches to editing", async () => {
+    const measure = () => browser.execute((sel) => {
+      const td = document.querySelector(sel)?.closest("td");
+      const shown = td?.querySelector<HTMLElement>(".glossary-cell-input:not([style*='none'])")
+        ?? td?.querySelector<HTMLElement>(".glossary-cell-display");
+      if (!td || !shown) throw new Error(`no cell at ${sel}`);
+      const box = shown.getBoundingClientRect();
+      const row = td.closest("tr")?.getBoundingClientRect();
+      const css = getComputedStyle(shown);
+      return { rowHeight: row?.height, height: box.height, left: box.left, paddingLeft: css.paddingLeft, fontSize: css.fontSize };
+    }, cell(1, 1, 1));
+
+    const reading = await measure();
+    await $(cell(1, 1, 1)).click();
+    const editing = await measure();
+    expect(editing).toEqual(reading);
+  });
+
   it("does not rewrite the note when cells are left unchanged", async () => {
     // Count writes to the note from here on.
     await browser.executeObsidian(({ app }, path) => {
