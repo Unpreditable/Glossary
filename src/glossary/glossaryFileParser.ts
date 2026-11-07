@@ -18,6 +18,11 @@ export interface ViewTable {
   colWidthsLineIdx: number | null;
 }
 
+/** Glossary tables have 2 columns (acronym, description) or 3 (acronym, full term, description). */
+export function isGlossaryTable(table: ViewTable): boolean {
+  return table.colCount === 2 || table.colCount === 3;
+}
+
 const COL_WIDTH_RE = /^\s*%%\s*glossary_column_width\s*=\s*([\d.\s|]+?)\s*%%\s*$/;
 
 // Looks for the width comment on the nearest non-blank line above the header.

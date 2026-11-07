@@ -3,6 +3,7 @@ import {
   writeRowToContent,
   insertRowAlphabeticallyInContent,
   setColWidthsInContent,
+  isGlossaryTable,
   addTermToContent,
 } from '../../src/glossary/glossaryFileParser';
 
@@ -34,6 +35,13 @@ describe('parseFileTables', () => {
       ['ROI', 1, 12],
     ]);
     expect(business.endLineIdx).toBe(13);
+  });
+
+  it('counts only 2- and 3-column tables as glossary tables', () => {
+    const row = (n: number) => '|' + ' x |'.repeat(n);
+    const sep = (n: number) => '|' + '---|'.repeat(n);
+    const content = [1, 2, 3, 6].map(n => [row(n), sep(n), row(n)].join('\n')).join('\n\n');
+    expect(parseFileTables(content).map(isGlossaryTable)).toEqual([false, true, true, false]);
   });
 
   it('reads an escaped pipe as part of its cell', () => {

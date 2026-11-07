@@ -299,6 +299,23 @@ describe("The Glossary View", () => {
     );
   });
 
+  it("leaves out tables that are not 2 or 3 columns, and edits the right table past one", async () => {
+    const wide = "| A | B | C | D |\n|---|---|---|---|\n| W | X | Y | Z |\n\n";
+    await obsidianPage.write(NOTE, (await obsidianPage.read(NOTE)).replace("# Business\n", wide + "# Business\n"));
+    await waitForNoteLine("| W | X | Y | Z |");
+    // The view rebuilds on the outside change; wait until the Business table is the second section.
+    await browser.waitUntil(async () => (await $(cell(2, 1, 1)).getText()) === "KPI", {
+      timeoutMsg: "the Business table is not shown second",
+    });
+    expect(await $$(SECTION).length).toBe(2);
+    // Three columns in each of the two sections: none from the four-column table.
+    expect(await $$(`${VIEW} col`).length).toBe(6);
+
+    await editCell(cell(2, 1, 3), "A measured target");
+    await waitForNoteLine("| KPI | Key Performance Indicator | A measured target |");
+    expect(await noteLines()).toContain("| W | X | Y | Z |");
+  });
+
   // A reload, as Hot Reload or an update does it. Turning the plugin off in Settings
   // (disablePluginAndSave, what togglePlugin does) is different: Obsidian itself closes its views.
   it("stays open when the plugin reloads", async () => {

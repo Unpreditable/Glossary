@@ -1,7 +1,7 @@
 import { App, TFile } from "obsidian";
 import { GlossarySettings } from "../settings";
 import { GlossaryTerm, TermIndex } from "./termIndex";
-import { parseFileTables } from "../glossary/glossaryFileParser";
+import { isGlossaryTable, parseFileTables } from "../glossary/glossaryFileParser";
 
 export function addToIndex(key: string, term: GlossaryTerm, termIndex: TermIndex): void {
   if (!termIndex[key]) {
@@ -32,7 +32,7 @@ export async function parseGlossaryFile(
   let count = 0;
   // The Glossary View's parser: it unescapes `\|` in cells and skips header, separator and empty rows.
   const rows = parseFileTables(content)
-    .filter((table) => table.colCount === 2 || table.colCount === 3)
+    .filter(isGlossaryTable)
     .flatMap((table) => table.rows);
   for (const { cells: columns } of rows) {
     const term: GlossaryTerm = { sourceFile: file.path };

@@ -1,6 +1,7 @@
 import { ItemView, SearchComponent, TFile, ViewStateResult, WorkspaceLeaf } from 'obsidian';
 import type GlossaryPlugin from '../main';
 import {
+  isGlossaryTable,
   parseFileTables,
   writeRowToContent,
   insertRowAlphabeticallyInContent,
@@ -60,7 +61,8 @@ function renderInlinePart(text: string, el: HTMLElement): void {
 export class GlossaryItemView extends ItemView {
   private filePath = '';
   private tables: ViewTable[] = [];
-  private sectionEls: HTMLElement[] = [];
+  /** Rendered sections by tableIdx; tables with other column counts have none. */
+  private sectionEls = new Map<number, HTMLElement>();
   private searchQuery = '';
   private pendingAddRow: number | null = null;
   /** The content this view last wrote, so its own writes aren't mistaken for outside changes. */
@@ -163,16 +165,18 @@ export class GlossaryItemView extends ItemView {
       });
 
     const body = contentEl.createDiv({ cls: 'glossary-view-body' });
-    this.sectionEls = [];
+    this.sectionEls = new Map();
 
-    if (this.tables.length === 0) {
-      body.createEl('p', { text: 'No tables found.', cls: 'glossary-view-empty' });
+    // Other tables stay in this.tables, so each table's tableIdx still matches the file's.
+    const shown = this.tables.filter(isGlossaryTable);
+    if (shown.length === 0) {
+      body.createEl('p', { text: 'No glossary tables found (2 or 3 columns).', cls: 'glossary-view-empty' });
       return;
     }
 
-    for (const table of this.tables) {
+    for (const table of shown) {
       const section = body.createDiv({ cls: 'glossary-view-section' });
-      this.sectionEls.push(section);
+      this.sectionEls.set(table.tableIdx, section);
       this.renderSection(section, table);
     }
 
@@ -409,7 +413,7 @@ export class GlossaryItemView extends ItemView {
       this.pendingAddRow = null;
       const tbody = inPlace
         ? tr.parentElement
-        : this.sectionEls[table.tableIdx]?.querySelector('tbody') ?? null;
+        : this.sectionEls.get(table.tableIdx)?.querySelector('tbody') ?? null;
       const target = this.tables[table.tableIdx];
       if (tbody && target) this.addNewRow(tbody, target);
     }
@@ -491,7 +495,7 @@ export class GlossaryItemView extends ItemView {
       t.colWidths = p.colWidths;
       t.colWidthsLineIdx = p.colWidthsLineIdx;
       // Widths can change with the cells unchanged (another program, Sync); show them.
-      const colgroup = this.sectionEls[i]?.querySelector('colgroup');
+      const colgroup = this.sectionEls.get(i)?.querySelector('colgroup');
       if (colgroup) applyColWidths(colgroup, t);
     });
     return true;
@@ -499,7 +503,7 @@ export class GlossaryItemView extends ItemView {
 
   private applySearch(): void {
     const q = this.searchQuery;
-    for (const section of this.sectionEls) {
+    for (const section of this.sectionEls.values()) {
       for (const tr of Array.from(section.querySelectorAll('tbody tr'))) {
         const text = Array.from((tr as HTMLElement).querySelectorAll('input'))
           .map(i => i.value).join(' ').toLowerCase();
