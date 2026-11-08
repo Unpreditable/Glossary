@@ -25,6 +25,10 @@ meanwhile.
 | `vault/Notes.md` | A note that mentions a defined acronym |
 | `specs/glossaryView.e2e.ts` | The Glossary View: editing, adding a term, column widths, staying open on reload, switching to and from the Markdown editor |
 | `specs/highlight.e2e.ts` | Terms highlighted in the editor |
+| `specs/matching.e2e.ts` | Plurals, full terms, and the matching settings (match by, case, fuzzy, exclusions) seen in the editor |
+| `specs/scope.e2e.ts` | Which notes get highlights (included and excluded folders, not glossary notes) and not in code |
+| `specs/tooltip.e2e.ts` | The definition shown on hovering a highlight |
+| `specs/addTerm.e2e.ts` | "Add to glossary" in the editor's right-click menu and the form it opens |
 | `specs/settings.e2e.ts` | The settings tab. Settings open in a window of their own, so specs reach it through `app.setting.activeTab.containerEl`, not `document` |
 | `tsconfig.json` | Type-checks the specs |
 | `harness.d.ts` | The harness's declarations of everything a spec can use. A copy: do not edit it |
@@ -40,7 +44,11 @@ A run refuses to start while `harness.d.ts` differs from the harness's own; refr
 Things the specs work around:
 
 - The harness's reset closes notes, not custom views, so `openGlossary()` closes Glossary View tabs
-  itself first.
+  itself first. It doesn't close modals either: the add-term spec presses Escape after each test.
+- `setPluginSettings` only saves. Specs that change a matching setting then call
+  `buildGlossaryIndex`, as the settings tab does.
+- Hovering and right-clicking are mouse events dispatched at the text's position: CodeMirror's
+  hover tooltip reads `mousemove`, Obsidian's editor menu reads `contextmenu`.
 - WebDriver's `setValue` blurs an input after clearing it, which ends a cell edit; cells are typed
   into with `browser.keys`.
 - The harness's `togglePlugin` turns the plugin off as Settings does, and Obsidian then closes its
