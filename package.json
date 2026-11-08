@@ -1,6 +1,6 @@
 {
   "name": "glossary",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Highlights glossary terms in notes and shows definitions on hover",
   "main": "main.js",
   "scripts": {
