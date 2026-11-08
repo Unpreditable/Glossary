@@ -1,0 +1,79 @@
+name: Bug Report
+description: Report something that isn't working right
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: latest-version
+    attributes:
+      label: Version check
+      options:
+        - label: I'm using the latest version of the [Smart Glossary plugin](https://github.com/Unpreditable/Glossary)
+          required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: What's the bug?
+      description: Describe what's going wrong, and which exact steps can you take to reproduce it? The more detail, the easier it is to track down.
+      placeholder: |
+        1. Add a glossary note with the row '...'
+        2. Open a note that contains '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-vs-actual
+    attributes:
+      label: Expected vs. actual behavior
+      description: What did you expect to happen, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: glossary-sample
+    attributes:
+      label: Glossary table and note text
+      description: The glossary table rows and the note text involved, with any sensitive text removed.
+      render: markdown
+    validations:
+      required: false
+
+  - type: input
+    id: obsidian-version
+    attributes:
+      label: Obsidian version
+      description: Found in Settings → About.
+      placeholder: 1.14.4
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      description: Found in Settings → Community plugins → Smart Glossary.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - iOS / iPadOS
+        - Android
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Screenshots, error messages, or anything else that might help.
+    validations:
+      required: false
