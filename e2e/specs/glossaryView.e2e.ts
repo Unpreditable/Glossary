@@ -126,6 +126,14 @@ describe("The Glossary View", () => {
     );
   });
 
+  it("shows the alphabetical-order hint only in a table with a new row", async () => {
+    const hint = (table: number) => $(`${SECTION}:nth-child(${table}) .glossary-view-add-hint`);
+    expect(await hint(1).isDisplayed()).toBe(false);
+    await $(`${SECTION}:nth-child(1) .glossary-view-add-btn`).click();
+    await hint(1).waitForDisplayed({ timeoutMsg: "the hint never showed after Add term" });
+    expect(await hint(2).isDisplayed()).toBe(false);
+  });
+
   it("still writes edits to the right line in a later table after a term was added", async () => {
     await $(`${SECTION}:nth-child(1) .glossary-view-add-btn`).click();
     await typeInCell("BIOS");

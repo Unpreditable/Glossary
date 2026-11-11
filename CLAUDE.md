@@ -14,7 +14,7 @@ npm run build
 # Type-check only (src and tests)
 npx tsc -noEmit -skipLibCheck
 
-# Lint: Obsidian's review rules over every .ts file and manifest.json
+# Lint: Obsidian's review rules: ESLint over every .ts file and manifest.json, stylelint over the CSS
 npm run lint
 
 # Unit tests (Jest, pure logic, in tests/)
@@ -45,7 +45,7 @@ Index is rebuilt on `onload` and debounced (5 s) on every glossary file `modify`
 
 **3. Decorations** (`src/decorations/`)
 - `glossaryViewPlugin.ts` — CodeMirror 6 `ViewPlugin`; caches matches per line keyed by the line's text, with line-relative positions, so edits never leave stale entries; rebuilds the visible ranges on `docChanged`, `viewportChanged`, or when `plugin.matcher` is a new object (the cache is then emptied); skips notes by the editor's own file (`editorInfoField`); fenced block exclusion is text-based (regex on `` ``` `` lines) rather than Lezer, as a reliable supplement; marks matches with `cm-glossary-highlight` class + `data-terms` JSON attribute
-- `cssInjector.ts` — applies the highlight style setting as a `glossary-style-<style>` class on each window's `<body>`, and the solid color as `--glossary-highlight-color`. All CSS lives in `styles.css`: gradient styles use `background-clip: text` + `border-image`; solid style uses `text-decoration underline`
+- `cssInjector.ts` — applies the highlight style setting as a `glossary-style-<style>` class on each window's `<body>`, and the solid color as `--glossary-highlight-color`. All CSS lives in `styles.css`: gradient styles use `background-clip: text` + `border-image`; solid style uses a `border-bottom` in `--glossary-highlight-color`
 
 **Refresh flow**: settings change → `main.refreshStyles()` (re-applies the body class and color) → `buildGlossaryIndex()`. Every index build makes a new `TermMatcher` and ends with `refreshEditors()` (`app.workspace.updateOptions()`), which sends every editor an update; the view plugin sees the new matcher and redecorates, so open notes never keep matches from an older index.
 
@@ -68,5 +68,5 @@ npm run build
 - All CodeMirror packages (`@codemirror/*`, `@lezer/*`) and `obsidian` are `external` in esbuild — they must never be bundled; they are provided by Obsidian at runtime.
 - `tsconfig.json` sets `baseUrl: "src"` — imports within `src/` can be relative or root-relative from `src`.
 - Obsidian minimum version: 1.13.0, for the declarative settings API (`getSettingDefinitions()`), which puts the settings in Obsidian's settings search. The settings tab has no `display()`. The `obsidian` typings and `@codemirror/state`/`view` are pinned to the exact versions one Obsidian release ships (currently 1.14.4); bump them together.
-- `npm run lint` runs the same eslint-plugin-obsidianmd rules as Obsidian's review bot, over every `.ts` file and `manifest.json`. Never switch a rule off or add an `eslint-disable` comment; change the code instead.
+- `npm run lint` runs the same rules as Obsidian's review bot: eslint-plugin-obsidianmd (plus the `no-unsafe-*` rules the bot adds) over every `.ts` file and `manifest.json`, and stylelint (`stylelint.config.mjs`, copied from the bot's config in obsidianmd/obsidian-workflows) over the CSS. Never switch a rule off or add an `eslint-disable` or `stylelint-disable` comment; change the code instead.
 - No `<style>` or `<link>` elements and no inline `style` assignments: CSS goes in `styles.css`, settings-driven values in body classes or CSS variables (`setCssProps`).

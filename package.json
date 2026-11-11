@@ -9,7 +9,7 @@
     "test": "jest --no-coverage",
     "test:e2e": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-e2e.mjs",
     "test:all": "npm run build && node ../ObsidianE2EHarness/bin/obsidian-test-all.mjs",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0 && stylelint \"**/*.css\" --max-warnings 0"
   },
   "devDependencies": {
     "@codemirror/language": "^6.12.2",
@@ -25,6 +25,8 @@
     "globals": "^17.4.0",
     "jest": "^30.3.0",
     "obsidian": "1.14.4",
+    "stylelint": "17.6.0",
+    "stylelint-no-unsupported-browser-features": "8.1.1",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1"

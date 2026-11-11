@@ -25,6 +25,29 @@ describe("Highlighting in the editor", () => {
     expect(style.background).toContain("linear-gradient");
   });
 
+  it("underlines in the chosen color with the solid style", async () => {
+    await setPluginSettings("glossary", { highlightStyle: "solid", highlightColor: "#ff0000" });
+    await browser.executeObsidian(({ plugins }) => {
+      (plugins.glossary as unknown as { refreshStyles(): void }).refreshStyles();
+    });
+    await obsidianPage.openFile("Notes.md");
+    await $(".cm-glossary-highlight").waitForExist({ timeoutMsg: "no term in Notes.md was highlighted" });
+    const border = await browser.execute(() => {
+      const mark = document.querySelector(".cm-glossary-highlight");
+      if (!mark) throw new Error("no highlight");
+      const css = getComputedStyle(mark);
+      return { width: parseFloat(css.borderBottomWidth), style: css.borderBottomStyle, color: css.borderBottomColor };
+    });
+    // The width is 2px at 100% zoom; the test window's zoom scales it.
+    expect(border.width).toBeGreaterThan(0);
+    expect(border.style).toBe("solid");
+    expect(border.color).toBe("rgb(255, 0, 0)");
+    await setPluginSettings("glossary", { highlightStyle: "gradient1" });
+    await browser.executeObsidian(({ plugins }) => {
+      (plugins.glossary as unknown as { refreshStyles(): void }).refreshStyles();
+    });
+  });
+
   it("highlights a term added to the glossary in a note that is already open", async () => {
     await obsidianPage.openFile("Notes.md");
     await $(".cm-glossary-highlight").waitForExist({ timeoutMsg: "Notes.md was never highlighted" });

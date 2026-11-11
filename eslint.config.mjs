@@ -34,6 +34,13 @@ export default defineConfig([
       globals: { ...globals.browser },
     },
     rules: {
+      // The review turns these on (as warnings) though the preset leaves them off; see
+      // buildScannerEslintConfig in obsidianmd/obsidian-workflows, src/lint.ts.
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-argument": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
       // Stricter than the preset: obsidianmd/regex-lookbehind should catch these but its own
       // pattern only matches the literal text "(?<!)". iOS before 16.4 can't parse a lookbehind,
       // and a regex literal is parsed when the module loads, so the plugin wouldn't load there.

@@ -13,6 +13,9 @@ export const GLOSSARY_VIEW_TYPE = 'glossary-view';
 /** Lucide icon for the Glossary View: a book with a letter, distinct from the reading-mode book. */
 export const GLOSSARY_ICON = 'book-a';
 
+/** On a table's section while it has an unsaved or just-added row. */
+const HAS_NEW_ROW = 'glossary-view-section-has-new';
+
 /** Sets a table's <col> widths: the ones stored in the note, or defaults by column count. */
 function applyColWidths(colgroup: Element, table: ViewTable): void {
   const defaults = table.colCount === 3 ? [12, 25, 63] : table.colCount === 2 ? [18, 82] : null;
@@ -186,6 +189,7 @@ export class GlossaryItemView extends ItemView {
 
   private renderSection(section: HTMLElement, table: ViewTable): void {
     section.empty();
+    section.removeClass(HAS_NEW_ROW);
     const tableEl = section.createEl('table', { cls: 'glossary-view-table' });
 
     const colgroup = tableEl.createEl('colgroup');
@@ -260,6 +264,8 @@ export class GlossaryItemView extends ItemView {
 
   private addNewRow(tbody: HTMLElement, table: ViewTable): HTMLTableRowElement {
     const tr = tbody.createEl('tr', { cls: 'glossary-row-new' });
+    // Shows the section's "alphabetical order on next open" hint; styles.css can't ask :has().
+    tbody.closest('.glossary-view-section')?.addClass(HAS_NEW_ROW);
     const inputs: HTMLInputElement[] = [];
     let saved = false;
 
