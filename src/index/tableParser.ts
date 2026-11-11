@@ -81,7 +81,12 @@ export async function buildTermIndex(
   const termIndex: TermIndex = {};
   let termCount = 0;
   for (const file of files) {
-    termCount += await parseGlossaryFile(app, file, settings, termIndex);
+    try {
+      termCount += await parseGlossaryFile(app, file, settings, termIndex);
+    } catch {
+      // The note went away (deleted or renamed) after the file list was taken. Its delete or
+      // rename event starts another build, which won't list it.
+    }
   }
   return { termIndex, termCount };
 }

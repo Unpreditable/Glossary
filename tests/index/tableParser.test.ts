@@ -94,4 +94,21 @@ describe('buildTermIndex', () => {
     expect(second.termIndex['API']).toHaveLength(2);
     expect(first.termCount).toBe(2);
   });
+
+  it('skips a glossary note deleted while the build reads it, and indexes the rest', async () => {
+    const content = ['| A | B |', '|---|---|', '| API | A contract |'].join('\n');
+    const app = {
+      vault: {
+        read: async (file: { path: string }) => {
+          if (file.path === 'gone.md') throw new Error(`ENOENT: no such file or directory, open '${file.path}'`);
+          return content;
+        },
+      },
+    } as unknown as App;
+    const { termIndex, termCount } = await buildTermIndex(
+      app, [makeMockFile('gone.md'), makeMockFile('kept.md')], SETTINGS,
+    );
+    expect(termCount).toBe(1);
+    expect(termIndex['API']?.[0].sourceFile).toBe('kept.md');
+  });
 });
